@@ -1,0 +1,31 @@
+{
+  "name": "netease-music-cli",
+  "version": "1.0.0",
+  "description": "NetEase Cloud Music AI Agent CLI (nm)",
+  "bin": {
+    "nm": "dist/netease-music.mjs",
+    "netease-music": "dist/netease-music.mjs"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "build": "vp pack src/main.ts --out-dir dist --clean --on-success \"node -e \\\"require('fs').copyFileSync('dist/main.mjs','dist/netease-music.mjs')\\\"\"",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4",
+    "typescript": "^5",
+    "vite-plus": "latest",
+    "vitest": "^3"
+  },
+  "dependencies": {
+    "playwright": "^1.60.0",
+    "simple-netease-cloud-music": "^0.5.2",
+    "yaml": "^2.9.0"
+  }
+}

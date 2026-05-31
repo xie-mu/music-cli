@@ -1,0 +1,39 @@
+version: workflow/v1
+inputs:
+  userId:
+    type: string
+    description: Target user ID
+steps:
+  - id: getHistory
+    type: user/history
+    input:
+      uid: "${input.userId}"
+      type: week
+  - id: getProfile
+    type: user/profile
+    input:
+      uid: "${input.userId}"
+    dependsOn: []
+  - id: summarize
+    type: script/js
+    input:
+      code: |
+        const records = args.records || [];
+        const profile = args.profile || {};
+        return {
+          user: profile.nickname || 'Unknown',
+          weekPlayCount: records.length,
+          topSongs: records.slice(0, 5).map(record => {
+            const song = record.song || record;
+            return {
+              name: song.name,
+              artist: (song.artists || song.ar || [{ name: '' }])[0].name
+            };
+          })
+        };
+      args:
+        records:
+          $from: getHistory
+        profile:
+          $from: getProfile
+    dependsOn: [getHistory, getProfile]

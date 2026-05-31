@@ -1,0 +1,30 @@
+version: workflow/v1
+inputs:
+  playlistId:
+    type: string
+    description: Target playlist ID
+steps:
+  - id: fetchTracks
+    type: playlist/tracks
+    input:
+      id: "${input.playlistId}"
+  - id: analyze
+    type: script/js
+    input:
+      code: |
+        const tracks = args.tracks || [];
+        const totalMs = tracks.reduce((sum, track) => sum + (track.durationMs || track.duration || track.dt || 0), 0);
+        const artists = {};
+        for (const track of tracks) {
+          const names = (track.artists || track.ar || [{ name: 'Unknown' }]).map(artist => artist.name);
+          for (const name of names) artists[name] = (artists[name] || 0) + 1;
+        }
+        return {
+          totalSongs: tracks.length,
+          totalMinutes: Math.round(totalMs / 60000),
+          topArtists: Object.entries(artists).sort((a, b) => b[1] - a[1]).slice(0, 10)
+        };
+      args:
+        tracks:
+          $from: fetchTracks
+    dependsOn: [fetchTracks]
