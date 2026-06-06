@@ -195,10 +195,10 @@ export const musicPlayCommand: Command = {
   options: [
     { flag: '--id <id>', description: 'Song ID', required: true, type: 'number' },
     { flag: '--br <br>', description: 'Bitrate', default: '320000' },
-    { flag: '--player <name>', description: 'Player hint (reserved)' },
+    { flag: '--player <name>', description: 'Player: orpheus (background) | browser (default: auto)' },
     { flag: '--no-open', description: 'Do not open browser; only return the official song URL', type: 'boolean' },
   ],
-  examples: ['nm music play --id 186016', 'nm music play --id 186016 --no-open --output json'],
+  examples: ['nm music play --id 186016', 'nm music play --id 186016 --no-open --output json', 'nm music play --id 186016 --player browser'],
   async run(config, flags) {
     const services = createNeteaseServices(config);
     const id = Number(flags.id);
@@ -208,7 +208,10 @@ export const musicPlayCommand: Command = {
 
     if (!config.quiet) process.stdout.write(`${title}\n`);
     const { playSong } = await import('../player.js');
-    const result = await playSong(id, title, { open: !shouldSkipOpening(flags) });
+    const result = await playSong(id, title, {
+      open: !shouldSkipOpening(flags),
+      player: flags.player,
+    });
     if ((flags.output || config.output) === 'json') {
       process.stdout.write(formatOutput(result, 'json') + '\n');
       return;

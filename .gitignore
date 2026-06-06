@@ -22,3 +22,10 @@ Thumbs.db
 # Config
 ~.netease-music/
 netease-music-downloads/
+
+# Agent workspace
+.reasonix/
+
+# SMTC thumbnail cache
+nm-smtc-thumb/
+C__Users_*/

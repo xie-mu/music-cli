@@ -6,6 +6,7 @@ import { NeteaseAPI } from '../http.js';
 import { NETEASE_PIPELINE_STEP_TYPES } from '../pipeline/builtins.js';
 import { Command } from '../types/core.js';
 import { createNeteaseServices } from '../services/index.js';
+import { createSmtcService } from '../services/smtc.js';
 
 interface DoctorCheck {
   name: string;
@@ -85,6 +86,15 @@ export const doctorCommand: Command = {
       name: 'pipeline builtins',
       ok: NETEASE_PIPELINE_STEP_TYPES.length >= 9,
       detail: NETEASE_PIPELINE_STEP_TYPES.join(', '),
+    });
+
+    const smtcService = createSmtcService();
+    checks.push({
+      name: 'smtc helper',
+      ok: smtcService.helperExists(),
+      detail: smtcService.helperExists()
+        ? `found ${smtcService.getHelperPath()}`
+        : `missing ${smtcService.getHelperPath()} (run npm run build:smtc on Windows)`,
     });
 
     checks.push(checkDocs(root));

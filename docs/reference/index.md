@@ -57,6 +57,20 @@
 | `nm insight weekly` | Weekly listening insight | [insight.md](insight.md) |
 | `nm insight monthly` | Monthly listening insight | [insight.md](insight.md) |
 | `nm insight yearly` | Yearly listening insight | [insight.md](insight.md) |
+| `nm smtc status` | Read the current NetEase SMTC media session | [smtc.md](smtc.md) |
+| `nm smtc sessions` | List active Windows SMTC media sessions | [smtc.md](smtc.md) |
+| `nm smtc play` | Request SMTC play on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc pause` | Request SMTC pause on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc toggle` | Request SMTC toggle on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc next` | Request SMTC next on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc prev` | Request SMTC prev on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc stop` | Request SMTC stop on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc seek` | Request SMTC seek on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc rate` | Request SMTC rate on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc shuffle` | Request SMTC shuffle on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc repeat` | Request SMTC repeat on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc fast-forward` | Request SMTC fast-forward on the NetEase media session | [smtc.md](smtc.md) |
+| `nm smtc rewind` | Request SMTC rewind on the NetEase media session | [smtc.md](smtc.md) |
 | `nm doctor` | Installation and capability diagnostics | [doctor.md](doctor.md) |
 
 ## By group
@@ -77,6 +91,7 @@
 | `library` | `liked` | [library.md](library.md) |
 | `queue` | `add`, `list`, `remove`, `clear`, `next`, `play` | [queue.md](queue.md) |
 | `insight` | `weekly`, `monthly`, `yearly` | [insight.md](insight.md) |
+| `smtc` | `status`, `sessions`, `play`, `pause`, `toggle`, `next`, `prev`, `stop`, `seek`, `rate`, `shuffle`, `repeat`, `fast-forward`, `rewind` | [smtc.md](smtc.md) |
 | `doctor` | `(root)` | [doctor.md](doctor.md) |
 
 ## Global flags

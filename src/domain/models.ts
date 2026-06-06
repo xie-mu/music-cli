@@ -130,7 +130,7 @@ export function normalizePlaylist(raw: any): Playlist {
     name: String(raw?.name ?? raw?.playlist?.name ?? ''),
     creator: raw?.creator?.nickname ?? raw?.playlist?.creator?.nickname,
     trackCount: Number(raw?.trackCount ?? raw?.playlist?.trackCount ?? tracks?.length ?? 0),
-    playCount: raw?.playCount ?? raw?.playlist?.playCount,
+    playCount: raw?.playCount ?? raw?.playcount ?? raw?.playlist?.playCount,
     description: raw?.description ?? raw?.playlist?.description,
     tags: raw?.tags ?? raw?.playlist?.tags ?? [],
     tracks: Array.isArray(tracks) ? tracks.map(normalizeSong) : undefined,
@@ -146,7 +146,7 @@ export function normalizeAlbum(raw: any): Album {
     artist: album.artist ? normalizeArtist(album.artist) : undefined,
     publishTime: album.publishTime,
     picUrl: album.picUrl ?? album.blurPicUrl,
-    songs: Array.isArray(raw?.songs) ? raw.songs.map(normalizeSong) : [],
+    songs: Array.isArray(album.songs) ? album.songs.map(normalizeSong) : [],
     raw,
   };
 }

@@ -30,8 +30,9 @@ export function formatPlaylist(pl: any): string {
   const lines: string[] = [];
   lines.push(`📋 ${pl.name}`);
   if (pl.description) lines.push(`   描述: ${pl.description}`);
-  lines.push(`   歌曲: ${pl.trackCount || pl.trackCount} 首 | 播放: ${formatCount(pl.playCount)} 次`);
-  lines.push(`   创建者: ${pl.creator?.nickname || pl.userId}`);
+  lines.push(`   歌曲: ${pl.trackCount || 0} 首 | 播放: ${formatCount(pl.playCount || 0)} 次`);
+  const creatorName = typeof pl.creator === 'string' ? pl.creator : pl.creator?.nickname;
+  lines.push(`   创建者: ${creatorName || pl.userId || ''}`);
   if (pl.tags?.length) lines.push(`   标签: ${pl.tags.join(', ')}`);
   return lines.join('\n');
 }

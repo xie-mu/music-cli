@@ -8,8 +8,9 @@ console.log("🎵 " + songName);
 
 const orpheusUrl = "orpheus://song/" + songId;
 if (platform() === "win32") {
-  spawn("powershell", ["-NoProfile", "-Command", "Start-Process \"" + orpheusUrl + "\""], { stdio: "ignore" });
+  // cmd /c start is quieter than PowerShell Start-Process — no extra window flash
+  spawn("cmd", ["/c", "start", "", orpheusUrl], { stdio: "ignore" });
 } else {
   spawn("open", [orpheusUrl], { stdio: "ignore" });
 }
-console.log("✅ 网易云客户端已打开");
+console.log("✅ 后台推送中");

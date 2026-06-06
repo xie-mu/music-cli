@@ -1,9 +1,12 @@
 ﻿/**
- * Music playback — NetEase Cloud Music official web player strategy.
+ * Music playback — NetEase Cloud Music desktop client strategy.
  *
- * The CLI deliberately opens the official NetEase web route instead of trying
- * to resolve audio streams. This keeps playback inside the user's browser or
- * desktop client and avoids CDN/DRM bypass behavior.
+ * On Windows, pushes the song directly to the NetEase desktop client via the
+ * `orpheus://` protocol handler using `cmd /c start`. This operates silently
+ * in the background — no browser window, no client window popup — as long as
+ * the client is already running.
+ *
+ * On macOS/Linux, falls back to opening the official web player in the browser.
  */
 import { spawn } from 'node:child_process';
 import { platform } from 'node:os';
@@ -18,6 +21,8 @@ export interface PlayerResult {
 
 export interface PlaySongOptions {
   open?: boolean;
+  /** Force a specific player: 'orpheus' | 'browser' | undefined (auto) */
+  player?: string;
 }
 
 /** Common NetEase Cloud Music song IDs for reference */
@@ -29,7 +34,31 @@ export const SONG_IDS = {
   SUNNY: 186016,            // 周杰伦 - 晴天
 } as const;
 
-function openUrl(url: string): void {
+/** Push song to NetEase desktop client via orpheus:// protocol (silent, background) */
+function pushOrpheus(songId: number): boolean {
+  const system = platform();
+  const orpheusUrl = `orpheus://song/${songId}`;
+
+  try {
+    if (system === 'win32') {
+      spawn('cmd', ['/c', 'start', '', orpheusUrl], {
+        detached: true,
+        stdio: 'ignore',
+        windowsHide: true,
+      });
+    } else if (system === 'darwin') {
+      spawn('open', [orpheusUrl], { detached: true, stdio: 'ignore' });
+    } else {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Open a URL in the default browser */
+function openBrowserUrl(url: string): void {
   const system = platform();
   const child = system === 'win32'
     ? spawn('cmd', ['/c', 'start', '', url], {
@@ -46,7 +75,6 @@ function openUrl(url: string): void {
           detached: true,
           stdio: 'ignore',
         });
-
   child.unref();
 }
 
@@ -56,6 +84,9 @@ export async function playSong(
   options: PlaySongOptions = {}
 ): Promise<PlayerResult> {
   const webUrl = `https://music.163.com/#/song?id=${songId}`;
+  const system = platform();
+
+  // ── --no-open: just return the URL ──────────────────────
   if (options.open === false) {
     return {
       player: 'none',
@@ -63,15 +94,36 @@ export async function playSong(
       opened: false,
       url: webUrl,
       message: [
-        `🔇 未打开浏览器: ${title || ''}`,
+        `🔇 未打开播放器: ${title || ''}`,
         `🔗 ${webUrl}`,
         `📖 歌词: nm music lyric --id ${songId}`,
       ].join('\n'),
     };
   }
 
+  // ── orpheus:// (Windows/macOS desktop client, background) ──
+  const useOrpheus = options.player === 'orpheus' || (!options.player && system === 'win32');
+  if (useOrpheus) {
+    const pushed = pushOrpheus(songId);
+    if (pushed) {
+      return {
+        player: 'orpheus',
+        success: true,
+        opened: false,
+        url: `orpheus://song/${songId}`,
+        message: [
+          `🎵 后台推送: ${title || ''}`,
+          `📖 歌词: nm music lyric --id ${songId}`,
+          `🎮 控制: nm smtc status`,
+        ].join('\n'),
+      };
+    }
+    // Fall through to browser if orpheus failed
+  }
+
+  // ── Browser fallback ────────────────────────────────────
   try {
-    openUrl(webUrl);
+    openBrowserUrl(webUrl);
     return {
       player: 'browser',
       success: true,

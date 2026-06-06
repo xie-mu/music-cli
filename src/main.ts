@@ -27,6 +27,11 @@ import { searchCommand, searchHotCommand, searchSuggestCommand } from './command
 import { toplistCommand, toplistDetailCommand, recommendSongsCommand, recommendPlaylistsCommand } from './commands/toplist.js';
 import { pipelineValidateCommand, pipelineRunCommand } from './commands/pipeline.js';
 import { nowplayingCommand } from './commands/nowplaying.js';
+import {
+  smtcStatusCommand, smtcSessionsCommand, smtcPlayCommand, smtcPauseCommand,
+  smtcToggleCommand, smtcNextCommand, smtcPrevCommand, smtcStopCommand, smtcSeekCommand,
+  smtcRateCommand, smtcShuffleCommand, smtcRepeatCommand, smtcFastForwardCommand, smtcRewindCommand,
+} from './commands/smtc.js';
 import { memoryShowCommand, memoryExportCommand, memoryClearCommand } from './commands/memory.js';
 import { libraryLikedCommand } from './commands/library.js';
 import {
@@ -126,6 +131,20 @@ register(insightMonthlyCommand);
 register(insightYearlyCommand);
 
 // system
+register(smtcStatusCommand);
+register(smtcSessionsCommand);
+register(smtcPlayCommand);
+register(smtcPauseCommand);
+register(smtcToggleCommand);
+register(smtcNextCommand);
+register(smtcPrevCommand);
+register(smtcStopCommand);
+register(smtcSeekCommand);
+register(smtcRateCommand);
+register(smtcShuffleCommand);
+register(smtcRepeatCommand);
+register(smtcFastForwardCommand);
+register(smtcRewindCommand);
 register(nowplayingCommand);
 register(doctorCommand);
 

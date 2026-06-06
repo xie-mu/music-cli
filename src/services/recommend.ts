@@ -14,7 +14,7 @@ export class RecommendService {
   }
 
   async playlists(): Promise<CapabilityResult<Playlist[]>> {
-    const data = await this.api.request('/api/v3/discovery/recommend/resource');
+    const data = await this.api.request('/api/discovery/recommend/resource', { csrf_token: '' }, 'POST');
     return capabilityResult((data.recommend || []).map(normalizePlaylist), 'netease:recommend/playlists', {
       requiresAuth: true,
       raw: data,
