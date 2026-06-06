@@ -29,3 +29,7 @@ netease-music-downloads/
 # SMTC thumbnail cache
 nm-smtc-thumb/
 C__Users_*/
+
+# Temp artifacts from CI/scripts
+$null
+$null;

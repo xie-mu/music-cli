@@ -6,7 +6,8 @@ const songName = process.argv[3] || "歌曲";
 
 console.log("🎵 " + songName);
 
-const orpheusUrl = "orpheus://song/" + songId;
+const payload = { type: "song", id: String(songId), cmd: "play", channel: "webset" };
+const orpheusUrl = "orpheus://" + Buffer.from(JSON.stringify(payload)).toString("base64");
 if (platform() === "win32") {
   // cmd /c start is quieter than PowerShell Start-Process — no extra window flash
   spawn("cmd", ["/c", "start", "", orpheusUrl], { stdio: "ignore" });

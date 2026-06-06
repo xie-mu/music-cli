@@ -8,7 +8,7 @@
  *
  * On macOS/Linux, falls back to opening the official web player in the browser.
  */
-import { spawn } from 'node:child_process';
+import { spawn, execSync } from 'node:child_process';
 import { platform } from 'node:os';
 
 export interface PlayerResult {
@@ -34,10 +34,55 @@ export const SONG_IDS = {
   SUNNY: 186016,            // 周杰伦 - 晴天
 } as const;
 
+/** Known NetEase Cloud Music process names across platforms */
+const CLIENT_PROCESS_NAMES = ['cloudmusic.exe', 'CloudMusic', 'netease-cloud-music', 'orpheus'];
+
+/**
+ * Check whether the NetEase desktop client is already running.
+ * On Windows uses tasklist; on macOS/Linux uses pgrep.
+ * Returns false if detection fails (safe default — will still try orpheus push).
+ */
+function isClientRunning(): boolean {
+  const system = platform();
+  try {
+    if (system === 'win32') {
+      const out = execSync('tasklist /FI "IMAGENAME eq cloudmusic.exe" /NH', {
+        encoding: 'utf8',
+        timeout: 3000,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      });
+      return out.includes('cloudmusic.exe');
+    }
+    if (system === 'darwin') {
+      const out = execSync('pgrep -i "CloudMusic|netease-cloud-music"', {
+        encoding: 'utf8',
+        timeout: 3000,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      });
+      return out.trim().length > 0;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Build the correct orpheus URL format.
+ * The desktop client expects base64-encoded JSON, not path-based URLs.
+ *   orpheus://base64({"type":"song","id":"<id>","cmd":"play","channel":"webset"})
+ * channel=webset mimics the web player → desktop IPC bridge, giving play
+ * commands priority over local queue playback.
+ */
+function buildOrpheusUrl(songId: number): string {
+  const payload = { type: 'song', id: String(songId), cmd: 'play', channel: 'webset' };
+  return 'orpheus://' + Buffer.from(JSON.stringify(payload)).toString('base64');
+}
+
 /** Push song to NetEase desktop client via orpheus:// protocol (silent, background) */
 function pushOrpheus(songId: number): boolean {
   const system = platform();
-  const orpheusUrl = `orpheus://song/${songId}`;
+  const orpheusUrl = buildOrpheusUrl(songId);
 
   try {
     if (system === 'win32') {
@@ -104,15 +149,31 @@ export async function playSong(
   // ── orpheus:// (Windows/macOS desktop client, background) ──
   const useOrpheus = options.player === 'orpheus' || (!options.player && system === 'win32');
   if (useOrpheus) {
+    const clientRunning = isClientRunning();
     const pushed = pushOrpheus(songId);
-    if (pushed) {
+    if (pushed && clientRunning) {
       return {
         player: 'orpheus',
         success: true,
         opened: false,
-        url: `orpheus://song/${songId}`,
+        url: buildOrpheusUrl(songId),
         message: [
           `🎵 后台推送: ${title || ''}`,
+          `📖 歌词: nm music lyric --id ${songId}`,
+          `🎮 控制: nm smtc status`,
+        ].join('\n'),
+      };
+    }
+    if (pushed && !clientRunning) {
+      return {
+        player: 'orpheus',
+        success: true,
+        opened: false,
+        url: buildOrpheusUrl(songId),
+        message: [
+          `🎵 后台推送: ${title || ''}`,
+          `⚠️ 网易云客户端未在后台运行，可能弹出窗口`,
+          `💡 建议: 将网易云客户端设为开机自启并最小化到托盘`,
           `📖 歌词: nm music lyric --id ${songId}`,
           `🎮 控制: nm smtc status`,
         ].join('\n'),

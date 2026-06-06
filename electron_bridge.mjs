@@ -20,7 +20,8 @@ function buildOrpheusUrl(songId) {
 export async function playSong(songId, title) {
   const url = buildOrpheusUrl(songId);
   if (platform() === "win32") {
-    spawn("powershell", ["-NoProfile", "-Command", "Start-Process \"" + url + "\""], { stdio: "ignore" });
+    // cmd /c start is quieter than PowerShell Start-Process — no extra window flash
+    spawn("cmd", ["/c", "start", "", url], { stdio: "ignore" });
   } else {
     spawn("open", [url], { stdio: "ignore" });
   }
