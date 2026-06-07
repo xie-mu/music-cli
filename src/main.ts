@@ -42,7 +42,7 @@ import { insightWeeklyCommand, insightMonthlyCommand, insightYearlyCommand } fro
 import { doctorCommand } from './commands/doctor.js';
 
 // ── Version ──────────────────────────────────────────────────
-const VERSION = '1.0.0';
+const VERSION = '1.2.0';
 
 // ── Register commands ────────────────────────────────────────
 const router = getCommandRouter();

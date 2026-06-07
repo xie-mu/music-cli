@@ -102,6 +102,34 @@ function pushOrpheus(songId: number): boolean {
   }
 }
 
+function scheduleNeteaseMinimize(): void {
+  if (platform() !== 'win32') return;
+
+  const script = [
+    '$ProgressPreference = "SilentlyContinue"',
+    'Start-Sleep -Milliseconds 4500',
+    'Add-Type -TypeDefinition \'using System; using System.Runtime.InteropServices; public static class NmNativeWindow { [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow); }\'',
+    'Get-Process cloudmusic -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | ForEach-Object { [NmNativeWindow]::ShowWindow($_.MainWindowHandle, 6) | Out-Null }',
+  ].join('; ');
+  const encodedCommand = Buffer.from(script, 'utf16le').toString('base64');
+
+  try {
+    spawn('powershell', [
+      '-NoProfile',
+      '-NonInteractive',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-EncodedCommand',
+      encodedCommand,
+    ], {
+      stdio: 'ignore',
+      windowsHide: true,
+    });
+  } catch {
+    // Best-effort only: playback should not fail just because window cleanup did.
+  }
+}
+
 /** Open a URL in the default browser */
 function openBrowserUrl(url: string): void {
   const system = platform();
@@ -151,6 +179,7 @@ export async function playSong(
   if (useOrpheus) {
     const clientRunning = isClientRunning();
     const pushed = pushOrpheus(songId);
+    if (pushed) scheduleNeteaseMinimize();
     if (pushed && clientRunning) {
       return {
         player: 'orpheus',
@@ -159,6 +188,7 @@ export async function playSong(
         url: buildOrpheusUrl(songId),
         message: [
           `🎵 后台推送: ${title || ''}`,
+          `🪟 将自动最小化网易云窗口`,
           `📖 歌词: nm music lyric --id ${songId}`,
           `🎮 控制: nm smtc status`,
         ].join('\n'),
@@ -173,6 +203,7 @@ export async function playSong(
         message: [
           `🎵 后台推送: ${title || ''}`,
           `⚠️ 网易云客户端未在后台运行，可能弹出窗口`,
+          `🪟 将尝试自动最小化网易云窗口`,
           `💡 建议: 将网易云客户端设为开机自启并最小化到托盘`,
           `📖 歌词: nm music lyric --id ${songId}`,
           `🎮 控制: nm smtc status`,

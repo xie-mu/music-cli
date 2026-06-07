@@ -10,7 +10,7 @@ Index: [index.md](index.md)
 | `nm music url` | Get song play URL |
 | `nm music lyric` | Get LRC lyrics (--sync for timed sync) |
 | `nm music download` | Download song to local file |
-| `nm music play` | Prepare playback through the official web player |
+| `nm music play` | Open or prepare playback through Orpheus/browser handoff |
 | `nm music like` | Like a song |
 | `nm music unlike` | Unlike a song |
 
@@ -123,8 +123,8 @@ nm music download --id 1807799505 --out ./唯一.mp3
 | Field | Value |
 |---|---|
 | **Name** | `music play` |
-| **Description** | Play song by opening the official web player, or return the link silently |
-| **Usage** | `nm music play --id <songId> [--br 320000] [--no-open]` |
+| **Description** | Play song through the official desktop/browser handoff, or return the link silently |
+| **Usage** | `nm music play --id <songId> [--br 320000] [--player orpheus|browser] [--no-open]` |
 
 #### Options
 
@@ -132,16 +132,28 @@ nm music download --id 1807799505 --out ./唯一.mp3
 |---|---|---|---|
 | `--id <id>` | number | yes | Song ID |
 | `--br <br>` | number | no | Bitrate (default: 320000) |
+| `--player <name>` | string | no | `orpheus` to force desktop protocol, `browser` to force web player, omitted for auto |
 | `--no-open` | boolean | no | Do not open browser; only return the official song URL |
 
 #### Playback flow
 
-Default mode opens `https://music.163.com/#/song?id=X` through the OS in a detached background process, so the CLI exits immediately. Use `--no-open` for Agent/headless runs where you only want the URL and local playback intent recorded.
+Default mode delegates to `src/player.ts`. On Windows, auto mode attempts the
+official `orpheus://` desktop protocol first and falls back to
+`https://music.163.com/#/song?id=X` in the browser if the protocol handoff
+cannot be launched. On other platforms, browser handoff is the normal path.
+
+The CLI reports handoff intent only; it does not prove that audio is playing.
+Use `nm smtc status` when the NetEase desktop client exposes a Windows media
+session and you need local status/control evidence. Use `--no-open` for
+Agent/headless runs where you only want the URL and local playback intent
+recorded.
 
 #### Examples
 
 ```bash
 nm music play --id 1807799505
+nm music play --id 1807799505 --player browser
+nm music play --id 1807799505 --player orpheus --output json
 nm music play --id 1807799505 --no-open --output json
 ```
 

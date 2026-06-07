@@ -8,6 +8,7 @@ Index: [index.md](index.md)
 - cookie availability
 - public API smoke check
 - registered pipeline music builtins
+- SMTC helper presence (`tools/smtc_query.exe`)
 - reference documentation links
 
 ```bash

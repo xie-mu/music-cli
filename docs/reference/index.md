@@ -1,6 +1,7 @@
 # NetEase Cloud Music CLI (`nm`) — Command Reference
 
-> Auto-generated from CLI source. Do not edit by hand.
+> Maintained from the CLI source. Keep this file aligned with `src/main.ts`,
+> command definitions under `src/commands/`, and `nm --help`.
 
 ## Quick index
 
@@ -12,7 +13,7 @@
 | `nm music info` | Song details (name, artist, album, duration) | [music.md](music.md) |
 | `nm music lyric` | LRC lyrics | [music.md](music.md) |
 | `nm music url` | Song play URL | [music.md](music.md) |
-| `nm music play` | Open browser web player | [music.md](music.md) |
+| `nm music play` | Open or prepare playback through Orpheus/browser handoff | [music.md](music.md) |
 | `nm music download` | Download song | [music.md](music.md) |
 | `nm music like` | Like a song | [music.md](music.md) |
 | `nm music unlike` | Unlike a song | [music.md](music.md) |
@@ -21,6 +22,12 @@
 | `nm playlist list` | User's playlists | [playlist.md](playlist.md) |
 | `nm playlist summary` | Playlist analysis | [playlist.md](playlist.md) |
 | `nm playlist create` | Create playlist | [playlist.md](playlist.md) |
+| `nm playlist add` | Add songs to a playlist | [playlist.md](playlist.md) |
+| `nm playlist remove` | Remove songs from a playlist | [playlist.md](playlist.md) |
+| `nm playlist dedupe` | Find or remove duplicate songs | [playlist.md](playlist.md) |
+| `nm playlist merge` | Merge source playlists | [playlist.md](playlist.md) |
+| `nm playlist export` | Export playlist tracks | [playlist.md](playlist.md) |
+| `nm playlist audit` | Audit playlist quality and duplicates | [playlist.md](playlist.md) |
 | `nm album show` | Album details | [album.md](album.md) |
 | `nm album list` | Subscribed albums | [album.md](album.md) |
 | `nm album sub` | Subscribe to album | [album.md](album.md) |
@@ -71,6 +78,7 @@
 | `nm smtc repeat` | Request SMTC repeat on the NetEase media session | [smtc.md](smtc.md) |
 | `nm smtc fast-forward` | Request SMTC fast-forward on the NetEase media session | [smtc.md](smtc.md) |
 | `nm smtc rewind` | Request SMTC rewind on the NetEase media session | [smtc.md](smtc.md) |
+| `nm nowplaying` | Detect current NetEase song from browser window titles | [nowplaying.md](nowplaying.md) |
 | `nm doctor` | Installation and capability diagnostics | [doctor.md](doctor.md) |
 
 ## By group
@@ -81,7 +89,7 @@
 | `config` | `show`, `set`, `export-schema` | [config.md](config.md) |
 | `user` | `profile`, `account`, `history`, `level`, `subcount` | [user.md](user.md) |
 | `music` | `info`, `url`, `lyric`, `download`, `play`, `like`, `unlike` | [music.md](music.md) |
-| `playlist` | `show`, `tracks`, `list`, `summary`, `create` | [playlist.md](playlist.md) |
+| `playlist` | `show`, `tracks`, `list`, `summary`, `create`, `add`, `remove`, `dedupe`, `merge`, `export`, `audit` | [playlist.md](playlist.md) |
 | `album` | `show`, `list`, `sub`, `unsub`, `dynamic`, `summary` | [album.md](album.md) |
 | `search` | `(root)`, `hot`, `suggest` | [search.md](search.md) |
 | `toplist` | `(root)`, `detail` | [toplist.md](toplist.md) |
@@ -92,6 +100,7 @@
 | `queue` | `add`, `list`, `remove`, `clear`, `next`, `play` | [queue.md](queue.md) |
 | `insight` | `weekly`, `monthly`, `yearly` | [insight.md](insight.md) |
 | `smtc` | `status`, `sessions`, `play`, `pause`, `toggle`, `next`, `prev`, `stop`, `seek`, `rate`, `shuffle`, `repeat`, `fast-forward`, `rewind` | [smtc.md](smtc.md) |
+| `nowplaying` | `(root)` | [nowplaying.md](nowplaying.md) |
 | `doctor` | `(root)` | [doctor.md](doctor.md) |
 
 ## Global flags
@@ -110,8 +119,9 @@ Available on every command (in addition to command-specific options):
 
 ## Notes
 
-- **Auth required**: All user-specific commands (`user *`, `music like/unlike`, `playlist create`, `album sub`) require `nm auth login`.
+- **Auth required**: User-specific and account-write commands (`user *`, `recommend *`, `music like/unlike`, `playlist list/create/add/remove/dedupe/merge`, `album list/sub/unsub`, `library liked`, `insight *`) require `nm auth login` or a valid cookie.
 - **Public data**: `search`, `music info`, `music lyric`, `playlist show`, `album show`, `toplist` work without authentication.
-- **CDN restriction**: Direct audio URLs may return 403. Use `nm music play` to open the web player in browser.
+- **Playback handoff**: `nm music play` uses the official Orpheus desktop protocol on Windows when possible, falls back to the browser player, and returns only launch intent. Use SMTC commands for local desktop-session status/control when available.
+- **CDN restriction**: Direct audio URLs and downloads may return 403 because of regional, copyright, or member restrictions.
 - **Sync lyrics**: `nm music lyric --id X --sync` provides timed lyrics synchronized with playback.
 - **Local memory**: `memory`, `queue`, and `insight` use local state under `~/.netease-music/state/`.

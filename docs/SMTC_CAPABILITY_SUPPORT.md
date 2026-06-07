@@ -1,7 +1,8 @@
 # NetEase SMTC Capability Support
 
-> Status: capability analysis only. This document does not define an implementation plan or change CLI behavior.
+> Status: capability and implemented CLI boundary for the current SMTC helper.
 > Date: 2026-06-06
+> Chinese version: [SMTC_CAPABILITY_SUPPORT.zh-CN.md](SMTC_CAPABILITY_SUPPORT.zh-CN.md)
 
 ## Scope
 
@@ -66,9 +67,10 @@ SMTC media properties can expose:
 - track number and album track count;
 - playback type.
 
-The current local SMTC helper draft only maps the fields most useful for CLI
-status output: `title`, `artist`, and `album`. Additional fields should be
-treated as optional because the NetEase client may not publish them consistently.
+The current local SMTC helper maps the fields most useful for CLI status output,
+including title, artist, album, playback status, timeline, advertised controls,
+and optional extended media properties. Fields should still be treated as
+optional because the NetEase client may not publish them consistently.
 
 ### Playback Information
 
@@ -106,11 +108,11 @@ Control results should be phrased carefully. A boolean accepted result means the
 Windows session/client accepted the request. It does not prove that audio
 started, stopped, or reached speakers.
 
-## Expected CLI Surface
+## Current CLI Surface
 
-If this capability is implemented later, the narrow command surface should be:
+The implemented command surface is intentionally narrow:
 
-| Command | Purpose | Suggested output |
+| Command | Purpose | Output |
 |---|---|---|
 | `nm smtc status` | Read the current NetEase SMTC session. | Current track, app, status, position, duration. |
 | `nm smtc status --all` | Include all active system media sessions. | NetEase target plus other sessions for diagnostics. |
@@ -211,10 +213,10 @@ SMTC should be treated as a local user-session capability:
   and rewind.
 - Microsoft documents media properties including title, artist, album title,
   album artist, genres, subtitle, thumbnail, playback type, and track numbers.
-- The local SMTC command/helper draft in the original worktree maps a narrower
-  project-facing subset: status, sessions, play, pause, toggle, next, previous,
-  stop, seek, title, artist, album, status, position, duration, and control
-  acceptance.
+- The local SMTC command/helper maps the project-facing subset used by this CLI:
+  status, sessions, play, pause, toggle, next, previous, stop, seek, rate,
+  shuffle, repeat, fast-forward, rewind, media metadata, timeline, advertised
+  controls, and control acceptance.
 
 References:
 

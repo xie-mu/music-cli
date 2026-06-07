@@ -1,7 +1,8 @@
 # 网易云 SMTC 能力支持文档
 
-> 状态：仅能力梳理，不代表实现计划或 CLI 行为变更。
+> 状态：当前 SMTC helper 的能力边界和已实现 CLI 表面。
 > 日期：2026-06-06
+> English version: [SMTC_CAPABILITY_SUPPORT.md](SMTC_CAPABILITY_SUPPORT.md)
 
 ## 范围
 
@@ -61,7 +62,7 @@ SMTC 媒体属性可能暴露：
 - 曲目序号和专辑曲目总数；
 - 播放类型。
 
-当前本地 SMTC helper 草稿只映射 CLI 状态输出最需要的字段：`title`、`artist`、`album`。其他字段应视为可选能力，因为网易云客户端不一定稳定发布。
+当前本地 SMTC helper 映射 CLI 状态输出最需要的字段，包括 title、artist、album、播放状态、时间线、会话暴露的控制能力，以及可选的扩展媒体属性。即便如此，这些字段仍应视为可选能力，因为网易云客户端不一定稳定发布。
 
 ### 播放信息
 
@@ -94,11 +95,11 @@ SMTC 可以向选中的网易云媒体会话发送请求式控制操作：
 
 控制结果必须谨慎表述。布尔型 accepted 或 `controlSucceeded` 只表示 Windows 媒体会话或客户端接受了请求，不证明音频已经开始、停止，或已经从扬声器播放出来。
 
-## 建议的 CLI 表面
+## 当前 CLI 表面
 
-如果后续实现该能力，建议保持窄命令表面：
+当前已实现的命令表面保持为窄接口：
 
-| 命令 | 用途 | 建议输出 |
+| 命令 | 用途 | 输出 |
 |---|---|---|
 | `nm smtc status` | 读取当前网易云 SMTC 会话。 | 当前曲目、应用、状态、进度、时长。 |
 | `nm smtc status --all` | 同时包含所有活跃系统媒体会话。 | 网易云目标会话，加上其他会话用于诊断。 |
@@ -188,7 +189,7 @@ SMTC 应视为本机用户会话能力：
 - Microsoft 文档说明 `GlobalSystemMediaTransportControlsSessionManager` 是 Windows 10 version 1809+ API，可请求 session manager 并列出可用媒体会话。
 - Microsoft 文档说明 `GlobalSystemMediaTransportControlsSession` 提供读取播放信息、读取媒体属性，以及请求 play、pause、skip、stop、toggle、seek、rate、shuffle、repeat、fast-forward、rewind 等控制的方法。
 - Microsoft 文档说明媒体属性包括 title、artist、album title、album artist、genres、subtitle、thumbnail、playback type 和 track numbers 等字段。
-- 原工作树中的本地 SMTC 命令/helper 草稿映射了一个更窄的项目侧子集：status、sessions、play、pause、toggle、next、previous、stop、seek、title、artist、album、status、position、duration 和控制接受状态。
+- 当前本地 SMTC 命令/helper 映射了项目侧子集：status、sessions、play、pause、toggle、next、previous、stop、seek、rate、shuffle、repeat、fast-forward、rewind、媒体元数据、时间线、会话暴露的控制能力和控制接受状态。
 
 参考链接：
 

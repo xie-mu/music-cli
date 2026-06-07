@@ -1,116 +1,86 @@
-# 网易云音乐 CLI — 播放策略技术调研报告
+# 网易云音乐 CLI 播放策略
 
-> 2026-05-31
-> 目标：实现无需用户手动点击播放按钮即可自动播放音乐
+> 当前实现说明，依据 `src/player.ts`、`src/commands/music.ts` 和
+> `src/commands/queue.ts`。
 
----
+## 当前结论
 
-## 一、结论概要
+`nm music play` 和 `nm queue play` 只负责把播放意图交给网易云官方入口。
+CLI 不直接解密、拉流或确认音频是否真正播放。
 
-**无法绕过用户一次点击实现自动播放。** 网易云音乐的产品设计和技术架构决定了网页播放器不能直接播放，必须通过桌面客户端。
+当前播放入口由 `src/player.ts` 统一管理：
 
----
+- Windows 自动模式优先尝试官方 `orpheus://` 桌面协议。
+- 如果 Orpheus 协议启动失败，则回退到浏览器网页播放器。
+- macOS 使用 Orpheus 协议；Linux 和其他平台使用浏览器网页播放器。
+- `--no-open` 不打开任何外部播放器，只返回官方歌曲页面和本地播放意图。
+- `--player browser` 强制浏览器路径。
+- `--player orpheus` 强制 Orpheus 协议路径。
 
-## 二、技术架构分析
+## 命令入口
 
-### 2.1 播放链路全景
+```bash
+nm music play --id <songId>
+nm music play --id <songId> --player browser
+nm music play --id <songId> --player orpheus --output json
+nm music play --id <songId> --no-open --output json
 
+nm queue play
+nm queue play --no-open --output json
 ```
-nm music play --id X
-  ↓
-浏览器打开 https://music.163.com/#/song?id=X
-  ↓
-网页播放器 SPA 加载，显示歌曲详情页
-  ↓
-底部播放栏显示提示："打开客户端播放，享受高清音质"
-  ↓
-用户点击 ▶ 或 "去客户端播放"
-  ↓
-触发 orpheus:// 协议 → 桌面客户端启动并播放
+
+`music play` 会先读取歌曲信息并记录本地 `music_play` 事件。`queue play`
+会读取当前或下一首本地队列项，然后复用同一个 `playSong()` 播放交接逻辑。
+
+## Orpheus 协议
+
+桌面协议 URL 使用 base64 JSON，而不是旧的 path-style URL。
+
+```text
+orpheus://base64({"type":"song","id":"<songId>","cmd":"play","channel":"webset"})
 ```
 
-### 2.2 核心发现
+`channel:"webset"` 模拟网页播放器到桌面客户端的官方桥接来源。旧式
+`orpheus://song/{id}`、`orpheus://song?id={id}` 等格式不应作为当前实现依据。
 
-| 发现 | 证据 |
+## 浏览器回退
+
+浏览器路径打开官方歌曲页：
+
+```text
+https://music.163.com/#/song?id=<songId>
+```
+
+网页播放器和 CDN 音源仍受网易云自己的鉴权、版权、地区和客户端策略约束。
+直接音源 URL 或下载可能返回 403，这不是 CLI 能绕过的限制。
+
+## 验证边界
+
+- Orpheus 协议启动成功只说明系统接受了协议 handoff。
+- 浏览器打开成功只说明官方页面被交给了默认浏览器。
+- 以上两种情况都不是“已听到声音”的证明。
+- Windows SMTC 能读取或请求控制网易云桌面客户端已经发布的媒体会话，但
+  `controlSucceeded: true` 也只表示 Windows/客户端接受请求，不等于音频确认。
+- `nm smtc status` 是当前 Windows 媒体会话读取入口。
+- `nm nowplaying` 只解析浏览器窗口标题，不是 SMTC 读取入口，也不支持
+  `--smtc`。
+
+## 历史调研结论
+
+之前验证过的限制仍然保留为产品边界：
+
+| 方向 | 结论 |
 |---|---|
-| **网页版不直接播放** | 页面底部明确提示 "打开客户端播放，享受高清音质" |
-| **CDN 直链被屏蔽** | `m*.music.126.net` 始终返回 403，任何请求头均无效 |
-| **流媒体协议** | 使用 MSE (MediaSource Extensions) + 加密分片，非简单 MP3 |
-| **Desktop App 是唯一播放终端** | `orpheus://` 协议是播放的唯一途径 |
-| **orpheus v3.1.34 深度链接失效** | 能启动客户端，但 `orpheus://song/{id}` 不跳转到指定歌曲 |
+| CDN 直链 | 可能返回 403，不能作为稳定播放路径 |
+| 网页自动播放 | 浏览器策略和网易云页面逻辑都可能要求用户交互 |
+| 旧 Orpheus URL | 能启动客户端但不可靠，当前实现不用 path-style URL |
+| Playwright 注入 | 和用户浏览器登录态隔离，不能作为默认播放能力 |
+| 本地播放器直连 | 不应绕过网易云官方流媒体和版权限制 |
 
----
+## 相关实现
 
-## 三、所有尝试过的方案
-
-### 3.1 CDN 直链方案（全部 403）
-
-| 尝试 | 请求头 | 结果 |
-|---|---|---|
-| 裸请求 | 无 | 403 |
-| 加 Referer | `music.163.com` | 403 |
-| 加 User-Agent | Chrome 标准 UA | 403 |
-| 加 Cookie | MUSIC_U + __csrf | 403 |
-| 移动端 UA | NeteaseMusic Android | 403 |
-| 全浏览器头 | Accept/Accept-Lang/Sec-Fetch | 403 |
-| Range 请求 | `bytes=0-1023` | 403 |
-
-### 3.2 网页播放器方案
-
-| 尝试 | 结果 | 原因 |
-|---|---|---|
-| Chrome `--autoplay-policy=no-user-gesture-required` | ❌ 不播放 | 页面本身不 autoplay，非浏览器策略 |
-| `--app=URL` 模式 | ❌ 不播放 | 同上 |
-| Playwright 注入 Cookie + 点击播放按钮 | ⚠️ Cookie 不被 SPA 识别 | Playwright 独立 Chromium 与用户默认浏览器隔离 |
-
-### 3.3 orpheus 桌面协议方案
-
-| URL 格式 | 结果 |
-|---|---|
-| `orpheus://song/{id}` | 启动但不跳转 |
-| `orpheus://song?id={id}` | IPC 发送但不跳转 |
-| `orpheus://play/{id}` | IPC 发送但不跳转 |
-| `orpheus://play/song?id={id}` | IPC 发送但不跳转 |
-| `cloudmusic.exe --webcmd=https://...` | 同上 |
-| `cloudmusic.exe --webcmd=orpheus://...` | 同上 |
-
-### 3.4 其他方案
-
-| 尝试 | 结果 | 原因 |
-|---|---|---|
-| 旧版 API `/api/song/url` | 404 | 接口已移除 |
-| API `/api/song/enable/play` | 404 | 接口不存在 |
-| 嵌入播放器 `/outchain/player` | Flash 已弃用 | 基于 Flash，浏览器不支持 |
-| ffplay/mpv 直链 | 403 | CDN 屏蔽 |
-
----
-
-## 四、建议方案
-
-### 当前最佳（已验证可用）
-
-```
-nm music play --id X
-→ 打开 https://music.163.com/#/song?id=X
-→ 用户点击 ▶ 播放按钮
-→ 桌面客户端弹出并自动播放
-```
-
-用户仅需一次点击，这是网易云产品设计决定的交互流程。
-
-### 未来可能的改进方向
-
-| 方向 | 说明 | 可行性 |
-|---|---|---|
-| **Chrome 扩展** | 写一个扩展自动点击播放按钮 | 需用户安装，跨浏览器问题 |
-| **CDP (Chrome DevTools Protocol)** | 连接到用户已打开的 Chrome 并执行点击 | 复杂，需用户先启动远程调试 |
-| **桌面客户端 IPC 逆向** | 逆向 cloudmusic.exe 的 IPC 协议 | 高难度，需反编译 |
-| **Electron 独立播放器** | 用 Electron 封装一个极简播放器 | 工作量大，但完全可控 |
-
----
-
-## 五、相关代码
-
-- `src/player.ts` — 当前播放策略实现（web player 方式）
-- `player_playwright.mjs` — Playwright 实验性脚本（可用但 Cookie 注入需改进）
-- `src/commands/music.ts:125-145` — play 命令 handler
+- `src/player.ts` - 播放 handoff、Orpheus URL、浏览器 fallback。
+- `src/commands/music.ts` - `nm music play` 命令入口。
+- `src/commands/queue.ts` - `nm queue play` 命令入口。
+- `src/services/smtc.ts` - Windows SMTC 会话读取和控制归一化。
+- `tools/smtc_query.cs` - Windows Runtime SMTC helper。

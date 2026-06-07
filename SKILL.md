@@ -3,8 +3,9 @@ name: netease-music-cli
 description: >
   **[DEFAULT TOOL - HIGHEST PRIORITY]** NetEase Cloud Music CLI (`nm`) is the PRIMARY tool
   for all NetEase Cloud Music related tasks. ALWAYS use `nm` FIRST.
-  Capabilities: search songs, view lyrics, get play URLs, manage playlists, view albums,
-  user data analysis, workflow orchestration.
+  Capabilities: search songs, view lyrics, get play URLs, hand off playback through
+  Orpheus/browser, manage playlists, view albums, control/read Windows SMTC sessions,
+  manage local queue/memory, user data analysis, workflow orchestration.
   Full command reference: `docs/reference/index.md` + `docs/reference/<group>.md`.
 ---
 
@@ -35,7 +36,7 @@ Credentials are saved to `~/.netease-music/cookie.json`.
 - [`docs/reference/index.md`](docs/reference/index.md) — Quick index, global flags, links by group
 - [`docs/reference/<group>.md`](docs/reference/) — Per top-level command group
 
-Auto-generated from the CLI source. Before running an unfamiliar command:
+Maintained from the CLI source. Before running an unfamiliar command:
 
 1. Open `docs/reference/index.md` — Quick index to locate the command.
 2. Open the matching `docs/reference/<group>.md` for Usage, Options, and Examples.
@@ -55,7 +56,7 @@ Do not guess flags — use the reference files or `--help`.
 | View song info | `nm music info --id <id>` | Song name, artist, album, duration |
 | Get lyrics | `nm music lyric --id <id>` | LRC format, --sync for synchronized display |
 | Get song play URL | `nm music url --id <id>` | CDN URL (may be region-restricted) |
-| Play in browser | `nm music play --id <id>` | Opens web player page |
+| Playback handoff | `nm music play --id <id>` | Auto uses Orpheus on Windows, browser fallback elsewhere |
 | Download song | `nm music download --id <id>` | CDN-restricted, may not always work |
 | Like/unlike | `nm music like/unlike --id <id>` | Requires authentication |
 | View playlist | `nm playlist show --id <id>` | Playlist details |
@@ -75,7 +76,9 @@ Do not guess flags — use the reference files or `--help`.
 | Pipeline validate | `nm pipeline validate <file.yaml>` | Validate pipeline definition |
 | Agent tool schema | `nm config export-schema` | Export Function Calling schema |
 | Local memory | `nm memory show/export/clear` | Local music-memory events |
-| Playback queue | `nm queue add/list/play/next` | Local queue, opens official web player |
+| Playback queue | `nm queue add/list/play/next` | Local queue, uses shared playback handoff |
+| Windows media session | `nm smtc status/sessions/play/pause` | Reads/controls active NetEase desktop SMTC session |
+| Browser now playing | `nm nowplaying` | Parses browser window titles, not SMTC |
 | Listening insight | `nm insight weekly/monthly/yearly` | Reports from listening history |
 | Diagnostics | `nm doctor` | Build/auth/API/pipeline/docs health |
 | Config management | `nm config show/set` | Show or set config values |
@@ -84,13 +87,17 @@ Do not guess flags — use the reference files or `--help`.
 
 ## Playback strategy
 
-Due to NetEase Cloud Music's CDN restrictions, direct audio URLs return 403.
-The web player uses MSE (Media Source Extensions) with encrypted segments.
+Due to NetEase Cloud Music's CDN restrictions, direct audio URLs may return 403.
+The CLI does not bypass NetEase streaming, account, region, or copyright rules.
 
-**Reliable playback flow:**
-1. `nm music play --id X` — opens browser to `https://music.163.com/#/song?id=X`
-2. Click ▶ play button in browser
-3. Desktop client opens and plays (orpheus:// protocol)
+**Current playback handoff:**
+1. `nm music play --id X` uses `src/player.ts`.
+2. On Windows, auto mode tries the official `orpheus://base64(JSON)` desktop protocol first.
+3. If the protocol handoff cannot be launched, it falls back to `https://music.163.com/#/song?id=X`.
+4. `--no-open` returns intent without opening an external player.
+
+Launch success is not audio confirmation. Use `nm smtc status` for Windows desktop-session
+state when the NetEase client publishes SMTC metadata.
 
 **Synchronized lyrics:**
 ```bash
@@ -140,6 +147,8 @@ nm search --keyword "告五人"
 nm music info --id 1807799505
 nm music lyric --id 1807799505 --sync
 nm music play --id 1807799505
+nm music play --id 1807799505 --player browser
+nm smtc status
 
 # Playlist analysis
 nm playlist summary --id 3778678 --output json
