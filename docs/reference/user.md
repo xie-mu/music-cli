@@ -69,3 +69,31 @@ nm user history --type week
 ```bash
 nm user level --output json
 ```
+
+### `nm user account`
+
+| Field | Value |
+|---|---|
+| **Name** | `user account` |
+| **Description** | Get account binding info |
+| **Usage** | `nm user account` |
+
+#### Examples
+
+```bash
+nm user account --output json
+```
+
+### `nm user subcount`
+
+| Field | Value |
+|---|---|
+| **Name** | `user subcount` |
+| **Description** | Get subscription counts |
+| **Usage** | `nm user subcount` |
+
+#### Examples
+
+```bash
+nm user subcount --output json
+```

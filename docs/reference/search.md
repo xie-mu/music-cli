@@ -1,14 +1,18 @@
-# `nm search / toplist / recommend` commands
+# `nm search` commands
 
 Index: [index.md](index.md)
 
-## search
+> **Toplist and recommend commands** are now documented in [toplist.md](toplist.md).
 
-| Command | Description |
-|---|---|
-| `nm search --keyword <text>` | Search songs, artists, albums, playlists |
-| `nm search hot` | Hot search trends |
-| `nm search suggest --keyword <text>` | Search suggestions |
+## Commands in this group
+
+| Command | Description | Auth |
+|---|---|---|
+| `nm search --keyword <text>` | Search songs, artists, albums, playlists | No |
+| `nm search hot` | Hot search trends | No |
+| `nm search suggest --keyword <text>` | Search suggestions | No |
+
+## Command details
 
 ### `nm search`
 
@@ -34,45 +38,36 @@ nm search --keyword "Taylor Swift" --type artist
 nm search --keyword 周杰伦 --output json
 ```
 
-## toplist
-
-| Command | Description |
-|---|---|
-| `nm toplist` | List all music charts |
-| `nm toplist detail --id <id>` | Chart detail (top songs) |
-
-### `nm toplist`
+### `nm search hot`
 
 | Field | Value |
 |---|---|
-| **Name** | `toplist` |
-| **Description** | List all NetEase music charts |
-| **Usage** | `nm toplist` |
+| **Name** | `search hot` |
+| **Description** | Get hot search trends |
+| **Usage** | `nm search hot` |
 
 #### Examples
 
 ```bash
-nm toplist
-nm toplist --output json
+nm search hot
 ```
 
-## recommend
-
-| Command | Description |
-|---|---|
-| `nm recommend songs` | Daily recommended songs |
-| `nm recommend playlists` | Recommended playlists |
-
-### `nm recommend songs`
+### `nm search suggest`
 
 | Field | Value |
 |---|---|
-| **Name** | `recommend songs` |
-| **Description** | Get daily recommended songs |
-| **Usage** | `nm recommend songs` |
+| **Name** | `search suggest` |
+| **Description** | Get search suggestions |
+| **Usage** | `nm search suggest --keyword <text>` |
+
+#### Options
+
+| Flag | Type | Required | Description |
+|---|---|---|---|
+| `--keyword <text>` | string | yes | Search keyword |
 
 #### Examples
 
 ```bash
-nm recommend songs
+nm search suggest --keyword 告五人
 ```

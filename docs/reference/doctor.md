@@ -2,6 +2,31 @@
 
 Index: [index.md](index.md)
 
+## Command details
+
+### `nm doctor`
+
+| Field | Value |
+|---|---|
+| **Name** | `doctor` |
+| **Description** | Check local installation and capability health |
+| **Usage** | `nm doctor` |
+
+#### Options
+
+| Flag | Type | Required | Description |
+|---|---|---|---|
+| `--output json` | string | no | Output in JSON format |
+
+#### Examples
+
+```bash
+nm doctor
+nm doctor --output json
+```
+
+## Diagnostics checks
+
 `nm doctor` checks local installation health:
 
 - build output presence
