@@ -3,6 +3,47 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+function commandNamesFromSource(): string[] {
+  const commandDir = join(process.cwd(), 'src', 'commands');
+  const main = readFileSync(join(process.cwd(), 'src', 'main.ts'), 'utf-8');
+  const files = [
+    'auth.ts',
+    'config.ts',
+    'user.ts',
+    'music.ts',
+    'playlist.ts',
+    'album.ts',
+    'search.ts',
+    'toplist.ts',
+    'pipeline.ts',
+    'memory.ts',
+    'library.ts',
+    'queue.ts',
+    'insight.ts',
+    'smtc.ts',
+    'nowplaying.ts',
+    'doctor.ts',
+  ];
+  const commandByExport = new Map<string, string>();
+
+  for (const file of files) {
+    const source = readFileSync(join(commandDir, file), 'utf-8');
+    for (const match of source.matchAll(/export const (\w+):?[^=]*=\s*\{[\s\S]*?name:\s*'([^']+)'/g)) {
+      commandByExport.set(match[1], match[2]);
+    }
+    for (const match of source.matchAll(/export const (\w+)\s*=\s*controlCommand\('([^']+)'/g)) {
+      commandByExport.set(match[1], `smtc ${match[2]}`);
+    }
+  }
+
+  return [...main.matchAll(/register\((\w+)\)/g)]
+    .map(match => {
+      const command = commandByExport.get(match[1]);
+      if (!command) throw new Error(`Could not resolve registered command export: ${match[1]}`);
+      return command;
+    });
+}
+
 describe('domain normalizers', () => {
   it('normalizes NetEase song shapes into a stable Song model', async () => {
     const { normalizeSong } = await import('../src/domain/models.js');
@@ -189,5 +230,45 @@ describe('reference docs', () => {
     const missing = links.filter(link => !existsSync(join(process.cwd(), 'docs', 'reference', link)));
 
     expect(missing).toEqual([]);
+  });
+
+  it('keeps the command reference index aligned with registered CLI commands', () => {
+    const commands = commandNamesFromSource();
+    const indexContent = readFileSync(join(process.cwd(), 'docs', 'reference', 'index.md'), 'utf-8');
+    const documentedCommands = [...indexContent.matchAll(/\| `nm ([^`]+)` \|/g)].map(match => match[1]);
+
+    expect(commands).toHaveLength(75);
+    expect(documentedCommands).toHaveLength(75);
+    expect([...documentedCommands].sort()).toEqual([...commands].sort());
+  });
+
+  it('documents command counts, auth boundaries, and schema export scope consistently', () => {
+    const commands = commandNamesFromSource();
+    const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf-8');
+    const rootReadme = read('README.md');
+    const architecture = read(join('docs', 'ARCHITECTURE.md'));
+    const skill = read('SKILL.md');
+    const authReference = read(join('docs', 'reference', 'auth.md'));
+    const indexReference = read(join('docs', 'reference', 'index.md'));
+    const configReference = read(join('docs', 'reference', 'config.md'));
+    const configCommand = read(join('src', 'commands', 'config.ts'));
+
+    expect(rootReadme).toContain('75');
+    expect(rootReadme).not.toMatch(/73 (?:个命令|涓|commands?)/i);
+    expect(architecture).toContain('Total: 75 registered commands across 17 top-level groups');
+    expect(commands).toHaveLength(75);
+
+    for (const doc of [skill, authReference, indexReference]) {
+      expect(doc).toContain('import-album');
+    }
+    for (const doc of [authReference, indexReference]) {
+      expect(doc).toContain('playlist show/play/tracks/summary');
+      expect(doc).toContain('queue *');
+      expect(doc).toContain('smtc *');
+    }
+
+    expect(configCommand).toContain("cmd.name !== 'config export-schema'");
+    expect(configReference).toContain('excludes `config export-schema` itself');
+    expect(commands.filter(command => command !== 'config export-schema')).toHaveLength(commands.length - 1);
   });
 });

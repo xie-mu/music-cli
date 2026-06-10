@@ -77,7 +77,7 @@ Response is also encrypted: hex → AES-ECB decrypt → JSON parse.
 | `config` | show, set, export-schema | — |
 | `user` | profile, account, history, level, subcount | Yes |
 | `music` | info, url, lyric, download, play, like, unlike | Partial |
-| `playlist` | show, tracks, list, summary, create, add, remove, dedupe, merge, export, audit | Partial |
+| `playlist` | show, play, tracks, list, summary, create, add, import-album, remove, dedupe, merge, export, audit | Partial |
 | `album` | show, list, sub, unsub, dynamic, summary | Partial |
 | `search` | (root), hot, suggest | — |
 | `toplist` | (root), detail | — |
@@ -91,7 +91,7 @@ Response is also encrypted: hex → AES-ECB decrypt → JSON parse.
 | `nowplaying` | (root) | — |
 | `doctor` | (root) | — |
 
-**Total: 73 registered commands across 17 top-level groups**
+**Total: 75 registered commands across 17 top-level groups**
 
 ## Playback Strategy
 

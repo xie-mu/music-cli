@@ -73,3 +73,10 @@ nm config set --key timeout --value 60
 nm config export-schema
 nm config export-schema --command "music info"
 ```
+
+#### Schema scope
+
+The CLI registers 75 commands. Full schema export returns 74 tool schemas
+because it intentionally excludes `config export-schema` itself to avoid a
+self-describing tool entry. Use `--command "config export-schema"` only when
+you explicitly need that single command schema.

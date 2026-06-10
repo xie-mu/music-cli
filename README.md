@@ -40,7 +40,7 @@ nm auth login --qrcode   # 扫码登录
 | 🩺 **诊断检查** | `nm doctor` |
 | 🤖 **Agent 协议** | `nm config export-schema` |
 
-**完整命令列表：** 73 个命令，17 个分组 → [docs/reference/index.md](docs/reference/index.md)
+**完整命令列表：** 75 个命令，17 个分组 → [docs/reference/index.md](docs/reference/index.md)
 
 ---
 
@@ -63,7 +63,7 @@ nm auth login --qrcode   # 扫码登录
 ├─ Layer 2: 命令参考文档 ────────┤
 │  docs/reference/* (16 文件)     │  ← 标准模板，人和 Agent 共用
 ├─ Layer 3: CLI 实现层 ──────────┤
-│  src/ (73 命令, 17 分组)        │  ← TypeScript 源码
+│  src/ (75 命令, 17 分组)        │  ← TypeScript 源码
 └─ Layer 4: 支撑文档 ────────────┤
    ARCHITECTURE + PLAYBACK + SMTC  │  ← 设计决策记录
 ```
@@ -83,7 +83,7 @@ nm auth logout                       # 退出登录
 
 凭证保存在 `~/.netease-music/cookie.json`。
 
-**无需登录的命令：** `search`, `music info/lyric`, `playlist show`, `album show`, `toplist`
+**无需登录的命令：** `search`, `music info/lyric/url`, `playlist show/play/tracks/summary`, `album show`, `toplist`, `queue *`, `memory *`, `smtc *`, `nowplaying`, `pipeline`, `doctor`
 
 ---
 
@@ -129,7 +129,7 @@ nm pipeline run scenarios/playlist-report.yaml --input '{"playlistId":"3778678"}
 netease-music-cli/
 ├── SKILL.md                  # AI Agent 指令手册
 ├── src/
-│   ├── main.ts               # 入口 + 73 个命令注册
+│   ├── main.ts               # 入口 + 75 个命令注册
 │   ├── router.ts             # Trie 树命令路由
 │   ├── config.ts             # 3 层配置合并 (file→env→flags)
 │   ├── crypto.ts             # eapi 加密引擎
@@ -145,7 +145,7 @@ netease-music-cli/
 │   └── reference/            # 命令参考文档 (16 文件)
 ├── tools/
 │   └── smtc_query.cs         # Windows SMTC helper
-└── tests/                    # 32 个测试用例
+└── tests/                    # 39 个测试用例
 ```
 
 ---

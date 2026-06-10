@@ -34,7 +34,8 @@ Requires Node.js ≥ 22.12.0.
 ## Authentication
 
 NetEase Cloud Music API requires a logged-in session for user-specific operations
-(`user *`, `recommend *`, `music like/unlike`, `playlist list/create/add/remove`,
+(`user *`, `recommend *`, `music like/unlike`,
+`playlist list/create/add/import-album/remove/dedupe/merge`,
 `album list/sub/unsub`, `library liked`, `insight *`).
 
 ```bash
@@ -48,7 +49,8 @@ nm auth logout                        # Clear credentials
 Credentials are saved to `~/.netease-music/cookie.json`.
 
 **Auth-free commands** (work without login): `search`, `music info`, `music lyric`,
-`playlist show`, `album show`, `toplist`.
+`music url`, `playlist show/play/tracks/summary`, `album show`, `toplist`,
+`queue *`, `memory *`, `smtc *`, `nowplaying`, `pipeline`, `doctor`.
 
 ## Command reference (authoritative)
 
@@ -82,12 +84,17 @@ Do not guess flags — use the reference files or `--help`.
 | Like/unlike song | `nm music like/unlike --id <id>` | Requires auth |
 | View playlist details | `nm playlist show --id <id>` | Name, creator, track count |
 | List playlist tracks | `nm playlist tracks --id <id>` | All songs in playlist |
+| **Push playlist to client** | **`nm playlist play --id <id>`** | **Push entire playlist to desktop client** |
+| **Import album to playlist** | **`nm playlist import-album --id <pl> --album-id <al>`** | **Auto-orders in playback sequence** |
+| Add songs to playlist | `nm playlist add --id <pl> --song-ids <ids>` | ⚠️ NetEase prepends — reverse order |
+| Remove songs from playlist | `nm playlist remove --id <pl> --song-ids <ids>` | Requires auth |
+| Merge playlists | `nm playlist merge --source-ids <ids> --target-id <id>` | With `--apply` to execute |
 | **☁️ Push playlist to client** | **`nm playlist play --id <id>`** | **Push entire playlist to NetEase desktop client** |
 | **📦 Import album to playlist** | **`nm playlist import-album --id <plId> --album-id <alId>`** | **Import album songs in playback order** |
 | My playlists | `nm playlist list` | Current user's playlists |
 | Playlist analysis | `nm playlist summary --id <id>` | Duration/artist/decade breakdown |
 | Playlist governance | `nm playlist audit/dedupe/export` | Duplicate checks, cleanup, export |
-| Create playlist | `nm playlist create --name <name>` | Requires auth |
+| Create playlist | `nm playlist create --name <name>` | Requires auth; **reuse existing playlist with same name first** |
 | View album | `nm album show --id <id>` | Details + track list |
 | My albums | `nm album list` | Subscribed albums |
 | Subscribe/unsubscribe album | `nm album sub/unsub --id <id>` | Requires auth |
@@ -101,10 +108,16 @@ Do not guess flags — use the reference files or `--help`.
 | Recommended playlists | `nm recommend playlists` | Personalized playlist recs |
 | Workflow pipeline | `nm pipeline run <file.yaml>` | Multi-step workflow orchestration |
 | Pipeline validate | `nm pipeline validate <file.yaml>` | Validate pipeline YAML |
-| Agent tool schema | `nm config export-schema` | Export Function Calling schema |
+| Agent tool schema | `nm config export-schema` | Export Function Calling schema; excludes `config export-schema` itself |
 | Local memory | `nm memory show/export/clear` | Local music-memory events |
 | Playback queue | `nm queue add/list/play/next` | Local queue, shared playback handoff |
-| Windows media session | `nm smtc status/play/pause/...` | Reads/controls NetEase SMTC session |
+| SMTC status (current song) | `nm smtc status` | Show current Windows media session |
+| SMTC list sessions | `nm smtc sessions` | List all active Windows SMTC sessions |
+| SMTC play/pause/toggle | `nm smtc play/pause/toggle` | Control playback |
+| SMTC next/prev/stop | `nm smtc next/prev/stop` | Track navigation |
+| SMTC seek | `nm smtc seek --position <sec>` | Seek to position |
+| SMTC shuffle/repeat | `nm smtc shuffle --enabled <bool> / repeat --mode <mode>` | Shuffle/repeat mode |
+| SMTC rate/fast-forward/rewind | `nm smtc rate/fast-forward/rewind` | Rate and seek controls |
 | Browser now playing | `nm nowplaying` | Parses browser window titles |
 | Listening insight | `nm insight weekly/monthly/yearly` | Reports from listening history |
 | Diagnostics | `nm doctor` | Build/auth/API/pipeline/docs health |

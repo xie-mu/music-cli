@@ -1,6 +1,7 @@
 # nm smtc - Windows SMTC Commands
 
-> Auto-generated from CLI source. Do not edit by hand.
+> Manually maintained and checked by docs consistency tests. Keep this file
+> aligned with `src/commands/smtc.ts` when SMTC commands change.
 
 ## `nm smtc status`
 
