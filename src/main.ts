@@ -15,8 +15,8 @@ import {
 } from './commands/music.js';
 import {
   playlistShowCommand, playlistTracksCommand, playlistListCommand,
-  playlistSummaryCommand, playlistCreateCommand, playlistAddCommand,
-  playlistRemoveCommand, playlistDedupeCommand, playlistMergeCommand,
+  playlistPlayCommand, playlistSummaryCommand, playlistCreateCommand, playlistAddCommand,
+  playlistImportAlbumCommand, playlistRemoveCommand, playlistDedupeCommand, playlistMergeCommand,
   playlistExportCommand, playlistAuditCommand,
 } from './commands/playlist.js';
 import {
@@ -75,11 +75,13 @@ register(musicUnlikeCommand);
 
 // playlist
 register(playlistShowCommand);
+register(playlistPlayCommand);
 register(playlistTracksCommand);
 register(playlistListCommand);
 register(playlistSummaryCommand);
 register(playlistCreateCommand);
 register(playlistAddCommand);
+register(playlistImportAlbumCommand);
 register(playlistRemoveCommand);
 register(playlistDedupeCommand);
 register(playlistMergeCommand);

@@ -79,6 +79,66 @@ describe('QueueService', () => {
   });
 });
 
+describe('PlaylistService', () => {
+  it('creates playlists through structured encrypted API params', async () => {
+    const { PlaylistService } = await import('../src/services/playlist.js');
+    const calls: Array<{ path: string; params: Record<string, unknown> | undefined; method?: string }> = [];
+    const api = {
+      requestWeapi: async (path: string, params?: Record<string, unknown>, method?: string) => {
+        calls.push({ path, params, method });
+        return { code: 200, id: 123, playlist: { id: 123, name: params?.name } };
+      },
+    };
+    const events: Array<{ type: string; payload: Record<string, unknown> }> = [];
+    const store = {
+      appendEvent: async (type: string, payload: Record<string, unknown>) => {
+        events.push({ type, payload });
+      },
+    };
+
+    const result = await new PlaylistService(api as any, store as any).create('Write Test', 'Verification');
+
+    expect(result.data.id).toBe(123);
+    expect(calls).toEqual([
+      {
+        path: '/api/playlist/create',
+        params: { name: 'Write Test', desc: 'Verification', privacy: 0, type: 'NORMAL' },
+        method: undefined,
+      },
+    ]);
+    expect(events).toEqual([{ type: 'playlist_create', payload: { name: 'Write Test' } }]);
+  });
+
+  it('rejects empty playlist mutation song id lists before calling the API', async () => {
+    const { PlaylistService } = await import('../src/services/playlist.js');
+    const api = { request: async () => { throw new Error('should not call API'); } };
+    const service = new PlaylistService(api as any);
+
+    await expect(service.add(123, [])).rejects.toMatchObject({
+      code: 'USAGE',
+      message: 'No valid song IDs were provided',
+    });
+    await expect(service.remove(123, [])).rejects.toMatchObject({
+      code: 'USAGE',
+      message: 'No valid song IDs were provided',
+    });
+  });
+});
+
+describe('playlist album import ordering', () => {
+  it('submits album songs from last to first so NetEase prepends into playback order', async () => {
+    const { albumSongsForPlaylistInsertion } = await import('../src/commands/playlist.js');
+
+    const submittedSongIds = albumSongsForPlaylistInsertion([
+      { id: 101 },
+      { id: 102 },
+      { id: 103 },
+    ]);
+
+    expect(submittedSongIds).toEqual([103, 102, 101]);
+  });
+});
+
 describe('pipeline music builtins', () => {
   it('registers music/search executors that reuse service functions', async () => {
     const { PipelineEngine } = await import('../src/pipeline/executor.js');

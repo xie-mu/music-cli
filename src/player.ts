@@ -71,18 +71,19 @@ function isClientRunning(): boolean {
  * Build the correct orpheus URL format.
  * The desktop client expects base64-encoded JSON, not path-based URLs.
  *   orpheus://base64({"type":"song","id":"<id>","cmd":"play","channel":"webset"})
+ *   orpheus://base64({"type":"playlist","id":"<id>","cmd":"play","channel":"webset"})
  * channel=webset mimics the web player → desktop IPC bridge, giving play
  * commands priority over local queue playback.
  */
-function buildOrpheusUrl(songId: number): string {
-  const payload = { type: 'song', id: String(songId), cmd: 'play', channel: 'webset' };
+function buildOrpheusUrl(type: 'song' | 'playlist', id: number): string {
+  const payload = { type, id: String(id), cmd: 'play', channel: 'webset' };
   return 'orpheus://' + Buffer.from(JSON.stringify(payload)).toString('base64');
 }
 
 /** Push song to NetEase desktop client via orpheus:// protocol (silent, background) */
-function pushOrpheus(songId: number): boolean {
+function pushOrpheus(type: 'song' | 'playlist', id: number): boolean {
   const system = platform();
-  const orpheusUrl = buildOrpheusUrl(songId);
+  const orpheusUrl = buildOrpheusUrl(type, id);
 
   try {
     if (system === 'win32') {
@@ -178,13 +179,13 @@ export async function playSong(
   const useOrpheus = options.player === 'orpheus' || (!options.player && system === 'win32');
   if (useOrpheus) {
     const clientRunning = isClientRunning();
-    const pushed = pushOrpheus(songId);
+    const pushed = pushOrpheus('song', songId);
     if (pushed && clientRunning) {
       return {
         player: 'orpheus',
         success: true,
         opened: false,
-        url: buildOrpheusUrl(songId),
+        url: buildOrpheusUrl('song', songId),
         message: [
           `🎵 后台推送: ${title || ''}`,
                     `📖 歌词: nm music lyric --id ${songId}`,
@@ -197,7 +198,7 @@ export async function playSong(
         player: 'orpheus',
         success: true,
         opened: false,
-        url: buildOrpheusUrl(songId),
+        url: buildOrpheusUrl('song', songId),
         message: [
           `🎵 后台推送: ${title || ''}`,
           `⚠️ 网易云客户端未在后台运行，可能弹出窗口`,
@@ -232,6 +233,69 @@ export async function playSong(
       opened: false,
       url: webUrl,
       message: `打开失败: ${err instanceof Error ? err.message : String(err)}`,
+    };
+  }
+}
+
+export async function playPlaylist(
+  playlistId: number,
+  title?: string,
+  options: PlaySongOptions = {}
+): Promise<PlayerResult> {
+  const webUrl = `https://music.163.com/#/playlist?id=${playlistId}`;
+  const system = platform();
+
+  if (options.open === false) {
+    return {
+      player: 'none',
+      success: true,
+      opened: false,
+      url: webUrl,
+      message: [
+        `Playback handoff disabled: ${title || ''}`,
+        `URL: ${webUrl}`,
+      ].join('\n'),
+    };
+  }
+
+  const useOrpheus = options.player === 'orpheus' || (!options.player && system === 'win32');
+  if (useOrpheus) {
+    const clientRunning = isClientRunning();
+    const pushed = pushOrpheus('playlist', playlistId);
+    if (pushed) {
+      return {
+        player: 'orpheus',
+        success: true,
+        opened: false,
+        url: buildOrpheusUrl('playlist', playlistId),
+        message: [
+          `Playlist pushed to NetEase desktop client: ${title || playlistId}`,
+          clientRunning ? 'Client detected in background' : 'Client was not detected before handoff',
+          'Control: nm smtc status',
+        ].join('\n'),
+      };
+    }
+  }
+
+  try {
+    openBrowserUrl(webUrl);
+    return {
+      player: 'browser',
+      success: true,
+      opened: true,
+      url: webUrl,
+      message: [
+        `Opened playlist in browser: ${title || playlistId}`,
+        `URL: ${webUrl}`,
+      ].join('\n'),
+    };
+  } catch (err) {
+    return {
+      player: 'none',
+      success: false,
+      opened: false,
+      url: webUrl,
+      message: `Open failed: ${err instanceof Error ? err.message : String(err)}`,
     };
   }
 }

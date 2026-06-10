@@ -15,8 +15,8 @@ authenticated by the session cookie (`MUSIC_U`).
 
 | Auth requirement | Command groups |
 |---|---|
-| **Required** | `user *`, `recommend *`, `music like/unlike`, `playlist list/create/add/remove/dedupe/merge`, `album list/sub/unsub`, `library liked`, `insight *` |
-| **Not required** | `search`, `music info/lyric/url`, `playlist show/tracks/summary`, `album show`, `toplist`, `queue *`, `memory *`, `smtc *`, `nowplaying`, `pipeline`, `doctor` |
+| **Required** | `user *`, `recommend *`, `music like/unlike`, `playlist list/create/add/import-album/remove/dedupe/merge`, `album list/sub/unsub`, `library liked`, `insight *` |
+| **Not required** | `search`, `music info/lyric/url`, `playlist show/play/tracks/summary`, `album show`, `toplist`, `queue *`, `memory *`, `smtc *`, `nowplaying`, `pipeline`, `doctor` |
 
 ### Auth methods
 

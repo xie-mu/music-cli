@@ -9,6 +9,23 @@ export function parseArgs(argv: string[], _options?: OptionDef[]): ParsedArgs {
   const result: ParsedArgs = { _positional: [] };
   let i = 0;
 
+  function assignFlag(key: string, value: string): void {
+    if (key in result) {
+      if (!Array.isArray(result[key])) {
+        result[key] = [result[key]];
+      }
+      result[key].push(value);
+    } else {
+      result[key] = value;
+    }
+
+    if (!key.includes('-')) return;
+    const camelKey = key.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    if (camelKey !== key) {
+      result[camelKey] = result[key];
+    }
+  }
+
   while (i < argv.length) {
     const arg = argv[i];
 
@@ -42,14 +59,7 @@ export function parseArgs(argv: string[], _options?: OptionDef[]): ParsedArgs {
       }
 
       // Handle repeated flags → array
-      if (key in result) {
-        if (!Array.isArray(result[key])) {
-          result[key] = [result[key]];
-        }
-        result[key].push(value);
-      } else {
-        result[key] = value;
-      }
+      assignFlag(key, value);
     }
     // Short flag: -f value (basic support)
     else if (arg.startsWith('-') && arg.length > 1 && !arg.startsWith('--')) {

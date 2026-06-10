@@ -7,11 +7,13 @@ Index: [index.md](index.md)
 | Command | Description |
 |---|---|
 | `nm playlist show` | View playlist details |
+| `nm playlist play` | Play a playlist in the NetEase desktop client |
 | `nm playlist tracks` | List all songs in playlist |
 | `nm playlist list` | List user's playlists |
 | `nm playlist summary` | Analyze playlist data |
 | `nm playlist create` | Create a new playlist |
 | `nm playlist add` | Add songs to a playlist |
+| `nm playlist import-album` | Import album songs into a playlist in playback order |
 | `nm playlist remove` | Remove songs from a playlist |
 | `nm playlist dedupe` | Find or remove duplicate songs |
 | `nm playlist merge` | Merge source playlists |
@@ -55,6 +57,60 @@ nm playlist show --id 3778678 --output json
 nm playlist tracks --id 3778678
 nm playlist tracks --id 3778678 --output json
 ```
+
+### `nm playlist play`
+
+| Field | Value |
+|---|---|
+| **Name** | `playlist play` |
+| **Description** | Hand a playlist to the NetEase desktop client or browser |
+| **Usage** | `nm playlist play --id <playlistId> [--player orpheus|browser] [--no-open]` |
+
+#### Options
+
+| Flag | Type | Required | Description |
+|---|---|---|---|
+| `--id <id>` | number | yes | Playlist ID |
+| `--player <name>` | string | no | Playback target: `orpheus` or `browser` |
+| `--no-open` | boolean | no | Return the playlist URL without launching a player |
+
+#### Examples
+
+```bash
+nm playlist play --id 3778678
+nm playlist play --id 3778678 --player orpheus --output json
+nm playlist play --id 3778678 --no-open --output json
+```
+
+`nm queue *` manages the CLI local queue under local state. It does not rewrite
+the NetEase desktop client's right-side play queue. To load a remote playlist
+into the desktop client's playback list, use `nm playlist play --id <playlistId>`.
+
+### `nm playlist import-album`
+
+| Field | Value |
+|---|---|
+| **Name** | `playlist import-album` |
+| **Description** | Import all songs from an album into a playlist |
+| **Usage** | `nm playlist import-album --id <playlistId> --album-id <albumId>` |
+
+#### Options
+
+| Flag | Type | Required | Description |
+|---|---|---|---|
+| `--id <id>` | number | yes | Target playlist ID |
+| `--album-id <id>` | number | yes | Source album ID |
+
+#### Examples
+
+```bash
+nm playlist import-album --id 123 --album-id 92895788
+nm playlist import-album --id 123 --album-id 92895788 --dry-run --output json
+```
+
+The command submits album songs from last to first. NetEase prepends newly added
+songs to the playlist, so this preserves the album's normal playback order in
+the final playlist.
 
 ### `nm playlist list`
 

@@ -18,11 +18,13 @@
 | `nm music like` | Like a song | [music.md](music.md) |
 | `nm music unlike` | Unlike a song | [music.md](music.md) |
 | `nm playlist show` | Playlist details | [playlist.md](playlist.md) |
+| `nm playlist play` | Play playlist in the NetEase desktop client | [playlist.md](playlist.md) |
 | `nm playlist tracks` | All songs in playlist | [playlist.md](playlist.md) |
 | `nm playlist list` | User's playlists | [playlist.md](playlist.md) |
 | `nm playlist summary` | Playlist analysis | [playlist.md](playlist.md) |
 | `nm playlist create` | Create playlist | [playlist.md](playlist.md) |
 | `nm playlist add` | Add songs to a playlist | [playlist.md](playlist.md) |
+| `nm playlist import-album` | Import album songs into a playlist | [playlist.md](playlist.md) |
 | `nm playlist remove` | Remove songs from a playlist | [playlist.md](playlist.md) |
 | `nm playlist dedupe` | Find or remove duplicate songs | [playlist.md](playlist.md) |
 | `nm playlist merge` | Merge source playlists | [playlist.md](playlist.md) |
@@ -89,7 +91,7 @@
 | `config` | `show`, `set`, `export-schema` | [config.md](config.md) |
 | `user` | `profile`, `account`, `history`, `level`, `subcount` | [user.md](user.md) |
 | `music` | `info`, `url`, `lyric`, `download`, `play`, `like`, `unlike` | [music.md](music.md) |
-| `playlist` | `show`, `tracks`, `list`, `summary`, `create`, `add`, `remove`, `dedupe`, `merge`, `export`, `audit` | [playlist.md](playlist.md) |
+| `playlist` | `show`, `play`, `tracks`, `list`, `summary`, `create`, `add`, `import-album`, `remove`, `dedupe`, `merge`, `export`, `audit` | [playlist.md](playlist.md) |
 | `album` | `show`, `list`, `sub`, `unsub`, `dynamic`, `summary` | [album.md](album.md) |
 | `search` | `(root)`, `hot`, `suggest` | [search.md](search.md) |
 | `toplist` | `(root)`, `detail` | [toplist.md](toplist.md) |
@@ -122,6 +124,8 @@ Available on every command (in addition to command-specific options):
 - **Auth required**: User-specific and account-write commands (`user *`, `recommend *`, `music like/unlike`, `playlist list/create/add/remove/dedupe/merge`, `album list/sub/unsub`, `library liked`, `insight *`) require `nm auth login` or a valid cookie.
 - **Public data**: `search`, `music info`, `music lyric`, `playlist show`, `album show`, `toplist` work without authentication.
 - **Playback handoff**: `nm music play` uses the official Orpheus desktop protocol on Windows when possible, falls back to the browser player, and returns only launch intent. Use SMTC commands for local desktop-session status/control when available.
+- **Desktop playlist handoff**: `nm playlist play --id X` hands a remote playlist to the NetEase desktop client. `nm queue *` remains a CLI-local queue stored under local state and does not rewrite the desktop client's right-side play queue.
+- **Album imports**: `nm playlist import-album` submits album songs from last to first so NetEase playlist prepending keeps the final playback order correct.
 - **CDN restriction**: Direct audio URLs and downloads may return 403 because of regional, copyright, or member restrictions.
 - **Sync lyrics**: `nm music lyric --id X --sync` provides timed lyrics synchronized with playback.
 - **Local memory**: `memory`, `queue`, and `insight` use local state under `~/.netease-music/state/`.

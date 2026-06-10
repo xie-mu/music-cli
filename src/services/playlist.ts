@@ -7,6 +7,7 @@ import {
   normalizePlaylist,
   normalizeSong,
 } from '../domain/models.js';
+import { NeteaseError } from '../error.js';
 import { LocalStore } from '../state/local-store.js';
 
 export interface PlaylistSummary {
@@ -98,12 +99,20 @@ export class PlaylistService {
   }
 
   async create(name: string, desc = ''): Promise<CapabilityResult<any>> {
-    const data = await this.api.request(`/api/playlist/create?name=${encodeURIComponent(name)}&desc=${encodeURIComponent(desc)}`);
+    const data = await this.api.requestWeapi('/api/playlist/create', {
+      name,
+      desc,
+      privacy: 0,
+      type: 'NORMAL',
+    });
     await this.store?.appendEvent('playlist_create', { name });
     return capabilityResult(data, 'netease:playlist/create', { requiresAuth: true, raw: data });
   }
 
   async add(id: number, songIds: number[]): Promise<CapabilityResult<any>> {
+    if (songIds.length === 0) {
+      throw new NeteaseError('USAGE', 'No valid song IDs were provided', 'Use --song-ids <id1,id2>');
+    }
     const data = await this.api.request('/api/playlist/manipulate/tracks', {
       op: 'add',
       pid: id,
@@ -114,6 +123,9 @@ export class PlaylistService {
   }
 
   async remove(id: number, songIds: number[]): Promise<CapabilityResult<any>> {
+    if (songIds.length === 0) {
+      throw new NeteaseError('USAGE', 'No valid song IDs were provided', 'Use --song-ids <id1,id2>');
+    }
     const data = await this.api.request('/api/playlist/manipulate/tracks', {
       op: 'del',
       pid: id,

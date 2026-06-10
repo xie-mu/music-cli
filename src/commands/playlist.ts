@@ -13,6 +13,20 @@ function flagValue(flags: Record<string, any>, camel: string, kebab: string): un
   return flags[camel] ?? flags[kebab];
 }
 
+function shouldSkipOpening(flags: Record<string, any>): boolean {
+  return flags.noOpen === true
+    || flags.noOpen === 'true'
+    || flags['no-open'] === true
+    || flags['no-open'] === 'true';
+}
+
+export function albumSongsForPlaylistInsertion(songs: Array<{ id: number }>): number[] {
+  return songs
+    .map(song => Number(song.id))
+    .filter(id => Number.isFinite(id) && id > 0)
+    .reverse();
+}
+
 export const playlistShowCommand: Command = {
   name: 'playlist show',
   description: 'View playlist details',
@@ -25,6 +39,47 @@ export const playlistShowCommand: Command = {
   async run(config, flags) {
     const result = await createNeteaseServices(config).playlist.show(Number(flags.id));
     process.stdout.write(formatOutput(result.data, flags.output || config.output) + '\n');
+  },
+};
+
+export const playlistPlayCommand: Command = {
+  name: 'playlist play',
+  description: 'Play a playlist in the NetEase desktop client',
+  usage: 'nm playlist play --id <playlistId> [--player orpheus|browser] [--no-open]',
+  permission: 'public',
+  capability: 'playlist.play',
+  returns: 'PlayerResult',
+  options: [
+    { flag: '--id <id>', description: 'Playlist ID', required: true, type: 'number' },
+    { flag: '--player <name>', description: 'Playback target: orpheus or browser' },
+    { flag: '--no-open', description: 'Do not open player; only return the playlist URL', type: 'boolean' },
+  ],
+  examples: [
+    'nm playlist play --id 3778678',
+    'nm playlist play --id 3778678 --player orpheus --output json',
+    'nm playlist play --id 3778678 --no-open --output json',
+  ],
+  async run(config, flags) {
+    const services = createNeteaseServices(config);
+    const playlistId = Number(flags.id);
+    let title: string | undefined;
+    try {
+      const info = await services.playlist.show(playlistId);
+      title = info.data.name;
+    } catch {
+      // Playlist playback only needs the id; metadata lookup is best-effort.
+    }
+    const { playPlaylist } = await import('../player.js');
+    const result = await playPlaylist(playlistId, title, {
+      open: !shouldSkipOpening(flags),
+      player: flags.player ? String(flags.player) : undefined,
+    });
+
+    if ((flags.output || config.output) === 'json') {
+      process.stdout.write(formatOutput(result, 'json') + '\n');
+      return;
+    }
+    process.stdout.write(result.message + '\n');
   },
 };
 
@@ -167,6 +222,63 @@ export const playlistAddCommand: Command = {
   async run(config, flags) {
     const result = await createNeteaseServices(config).playlist.add(Number(flags.id), parseIds(flagValue(flags, 'songIds', 'song-ids')));
     process.stdout.write(formatOutput(result.data, flags.output || config.output) + '\n');
+  },
+};
+
+export const playlistImportAlbumCommand: Command = {
+  name: 'playlist import-album',
+  description: 'Import album songs into a playlist in playback order',
+  usage: 'nm playlist import-album --id <playlistId> --album-id <albumId>',
+  permission: 'write',
+  capability: 'playlist.importAlbum',
+  returns: 'PlaylistAlbumImportResult',
+  options: [
+    { flag: '--id <id>', description: 'Target playlist ID', required: true, type: 'number' },
+    { flag: '--album-id <id>', description: 'Source album ID', required: true, type: 'number' },
+  ],
+  examples: [
+    'nm playlist import-album --id 123 --album-id 92895788',
+    'nm playlist import-album --id 123 --album-id 92895788 --dry-run --output json',
+  ],
+  async run(config, flags) {
+    const services = createNeteaseServices(config);
+    const playlistId = Number(flags.id);
+    const albumId = Number(flagValue(flags, 'albumId', 'album-id'));
+    const album = await services.album.show(albumId);
+    const albumSongIds = album.data.songs.map(song => song.id);
+    const submittedSongIds = albumSongsForPlaylistInsertion(album.data.songs);
+
+    if (config.dryRun) {
+      process.stdout.write(formatOutput({
+        playlistId,
+        albumId,
+        albumName: album.data.name,
+        songIds: albumSongIds,
+        submittedSongIds,
+        addedCount: submittedSongIds.length,
+        applied: false,
+        order: 'last-to-first',
+      }, flags.output || config.output) + '\n');
+      return;
+    }
+
+    const results = [];
+    for (const songId of submittedSongIds) {
+      const result = await services.playlist.add(playlistId, [songId]);
+      results.push(result.data);
+    }
+
+    process.stdout.write(formatOutput({
+      playlistId,
+      albumId,
+      albumName: album.data.name,
+      songIds: albumSongIds,
+      submittedSongIds,
+      addedCount: submittedSongIds.length,
+      applied: true,
+      order: 'last-to-first',
+      results,
+    }, flags.output || config.output) + '\n');
   },
 };
 

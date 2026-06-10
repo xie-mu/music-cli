@@ -27,6 +27,10 @@ nm music play --id <songId> --no-open --output json
 
 nm queue play
 nm queue play --no-open --output json
+
+nm playlist play --id <playlistId>
+nm playlist play --id <playlistId> --player orpheus --output json
+nm playlist play --id <playlistId> --no-open --output json
 ```
 
 `music play` 会先读取歌曲信息并记录本地 `music_play` 事件。`queue play`
@@ -38,7 +42,19 @@ nm queue play --no-open --output json
 
 ```text
 orpheus://base64({"type":"song","id":"<songId>","cmd":"play","channel":"webset"})
+orpheus://base64({"type":"playlist","id":"<playlistId>","cmd":"play","channel":"webset"})
 ```
+
+## Queue versus desktop playlist
+
+`nm queue *` is a CLI-local queue stored under local state. It is useful for
+agent workflows that need a private pending-play list, but it does not mutate
+the NetEase desktop client's right-side playback list.
+
+To load a remote playlist into the NetEase desktop client playback list, use
+`nm playlist play --id <playlistId>`. This uses the same official Orpheus
+handoff channel as song playback, but sends `type:"playlist"` in the base64
+payload.
 
 `channel:"webset"` 模拟网页播放器到桌面客户端的官方桥接来源。旧式
 `orpheus://song/{id}`、`orpheus://song?id={id}` 等格式不应作为当前实现依据。

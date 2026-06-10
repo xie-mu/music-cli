@@ -102,6 +102,15 @@ describe('Argument parser', () => {
     expect(result.id).toBe('456');
   });
 
+  it('should expose camelCase aliases for kebab-case flags', async () => {
+    const { parseArgs } = await import('../src/parser.js');
+    const result = parseArgs(['--page-size', '20', '--song-ids=186016,1807799505']);
+    expect(result['page-size']).toBe('20');
+    expect(result.pageSize).toBe('20');
+    expect(result['song-ids']).toBe('186016,1807799505');
+    expect(result.songIds).toBe('186016,1807799505');
+  });
+
   it('should collect positional args', async () => {
     const { parseArgs } = await import('../src/parser.js');
     const result = parseArgs(['subcommand', '--flag', 'val']);
