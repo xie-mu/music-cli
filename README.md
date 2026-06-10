@@ -30,7 +30,9 @@ nm auth login --qrcode   # 扫码登录
 | 📄 **歌曲信息** | `nm music info --id <id>` |
 | 📜 **滚动歌词** | `nm music lyric --id <id> --sync` |
 | ▶️ **播放推送** | `nm music play --id <id>` |
-| 📋 **歌单管理** | `nm playlist show/list/summary/create/...` |
+| ☁️ **歌单云端直推** | **`nm playlist play --id <id>`** |
+| 📦 **专辑导入歌单** | **`nm playlist import-album --id <pl> --album-id <al>`** |
+| 📋 **歌单管理** | `nm playlist show/list/summary/create/add/...` |
 | 💿 **专辑浏览** | `nm album show/list/sub/unsub` |
 | 📊 **用户分析** | `nm user profile/history/level` |
 | 📈 **听歌报告** | `nm insight weekly/monthly/yearly` |
@@ -114,7 +116,25 @@ nm smtc play/pause/next/prev            # 控制播放
 nm smtc seek --position 60              # 跳转到60秒
 ```
 
-### 工作流编排
+### ☁️ 云端歌单推送
+
+```bash
+nm playlist create --name "我的歌单" --desc "描述"
+nm playlist add --id <pl> --song-ids 186016,1807799505
+nm playlist play --id <pl>             # 直推整个歌单到桌面客户端
+```
+
+> ⚠️ NetEase 前置插入：新歌加在最前面。想正序显示请倒序传参。
+
+### 📦 专辑导入歌单
+
+```bash
+nm album show --id 92895788            # 查看专辑曲目
+nm playlist import-album --id <pl> --album-id 92895788  # 按序导入
+nm playlist play --id <pl>             # 播放
+```
+
+### 🔄 工作流编排
 
 ```bash
 nm pipeline validate scenarios/playlist-report.yaml
