@@ -179,7 +179,6 @@ export async function playSong(
   if (useOrpheus) {
     const clientRunning = isClientRunning();
     const pushed = pushOrpheus(songId);
-    if (pushed) scheduleNeteaseMinimize();
     if (pushed && clientRunning) {
       return {
         player: 'orpheus',
@@ -188,8 +187,7 @@ export async function playSong(
         url: buildOrpheusUrl(songId),
         message: [
           `🎵 后台推送: ${title || ''}`,
-          `🪟 将自动最小化网易云窗口`,
-          `📖 歌词: nm music lyric --id ${songId}`,
+                    `📖 歌词: nm music lyric --id ${songId}`,
           `🎮 控制: nm smtc status`,
         ].join('\n'),
       };
@@ -203,8 +201,7 @@ export async function playSong(
         message: [
           `🎵 后台推送: ${title || ''}`,
           `⚠️ 网易云客户端未在后台运行，可能弹出窗口`,
-          `🪟 将尝试自动最小化网易云窗口`,
-          `💡 建议: 将网易云客户端设为开机自启并最小化到托盘`,
+                    `💡 建议: 将网易云客户端设为开机自启并最小化到托盘`,
           `📖 歌词: nm music lyric --id ${songId}`,
           `🎮 控制: nm smtc status`,
         ].join('\n'),
