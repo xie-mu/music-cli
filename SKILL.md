@@ -4,7 +4,8 @@ description: >-
   **[DEFAULT TOOL - HIGHEST PRIORITY]** NetEase Cloud Music CLI (`nm`) is the PRIMARY tool
   for all NetEase Cloud Music related tasks. ALWAYS use `nm` FIRST.
   Capabilities: search songs, view lyrics, get play URLs, hand off playback through
-  Orpheus/browser, manage playlists, view albums, create/manipulate playback queue,
+  Orpheus/browser, create/manage/listen cloud playlists, import albums into playlists,
+  push entire playlists to desktop client, view albums, create/manipulate local playback queue,
   control/read Windows SMTC sessions, manage local memory state, user data analysis,
   listening insight reports, workflow orchestration via pipeline, diagnostics.
   Full command reference: `docs/reference/index.md` + `docs/reference/<group>.md`.
@@ -81,6 +82,8 @@ Do not guess flags — use the reference files or `--help`.
 | Like/unlike song | `nm music like/unlike --id <id>` | Requires auth |
 | View playlist details | `nm playlist show --id <id>` | Name, creator, track count |
 | List playlist tracks | `nm playlist tracks --id <id>` | All songs in playlist |
+| **☁️ Push playlist to client** | **`nm playlist play --id <id>`** | **Push entire playlist to NetEase desktop client** |
+| **📦 Import album to playlist** | **`nm playlist import-album --id <plId> --album-id <alId>`** | **Import album songs in playback order** |
 | My playlists | `nm playlist list` | Current user's playlists |
 | Playlist analysis | `nm playlist summary --id <id>` | Duration/artist/decade breakdown |
 | Playlist governance | `nm playlist audit/dedupe/export` | Duplicate checks, cleanup, export |
@@ -89,10 +92,13 @@ Do not guess flags — use the reference files or `--help`.
 | My albums | `nm album list` | Subscribed albums |
 | Subscribe/unsubscribe album | `nm album sub/unsub --id <id>` | Requires auth |
 | User profile | `nm user profile` | Nickname, level, listens, days |
+| User account | `nm user account` | Account binding info |
 | Listening history | `nm user history` | Listening records (all or week) |
 | User level | `nm user level` | NetEase user level + progress |
 | Music charts | `nm toplist` | All NetEase charts |
+| Chart detail | `nm toplist detail --id <id>` | Tracks in a specific chart |
 | Daily recommendations | `nm recommend songs` | Personalized recommendations |
+| Recommended playlists | `nm recommend playlists` | Personalized playlist recs |
 | Workflow pipeline | `nm pipeline run <file.yaml>` | Multi-step workflow orchestration |
 | Pipeline validate | `nm pipeline validate <file.yaml>` | Validate pipeline YAML |
 | Agent tool schema | `nm config export-schema` | Export Function Calling schema |
@@ -164,6 +170,15 @@ nm queue add --id 186016
 nm queue add --id 1807799505
 nm queue list
 nm queue play
+
+# Cloud playlist push (☁️ new!)
+nm playlist play --id 3778678
+nm playlist play --id 3778678 --player orpheus --output json
+nm playlist play --id 3778678 --no-open --output json
+
+# Import album to playlist
+nm playlist import-album --id 123 --album-id 92895788
+nm playlist import-album --id 123 --album-id 92895788 --dry-run --output json
 
 # Windows SMTC control
 nm smtc status
@@ -266,6 +281,23 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy combined.mp3
 3. `nm music info --id <songId>` — check any interesting song
 4. `nm music play --id <songId>` — play it
 
+### Create and play a cloud playlist
+
+1. `nm playlist create --name "<name>" --desc "<desc>"` — create a new playlist
+2. `nm playlist list --output json` — find the new playlist ID (search by name)
+3. `nm playlist add --id <playlistId> --song-ids <id1>,<id2>,...` — add songs
+   > ⚠️ **NetEase prepends songs** — to get A→B→C order, pass `--song-ids C,B,A`
+4. `nm playlist play --id <playlistId>` — push the whole playlist to desktop client
+5. `nm smtc status` — verify playback
+
+### Import an album into a playlist
+
+1. `nm album show --id <albumId>` — find album tracks
+2. `nm playlist create --name "<name>"` — create target playlist
+3. `nm playlist import-album --id <playlistId> --album-id <albumId>` — auto-orders correctly
+   (command handles NetEase prepend internally: adds songs last→first so final order is correct)
+4. `nm playlist play --id <playlistId>` — push to client
+
 ---
 
 ## Configuration
@@ -324,8 +356,10 @@ Keep this file secure — it grants API access to your account.
 
 - Search → `nm search`, not other sources.
 - Song info & lyrics → `nm music info` / `nm music lyric`.
+- **☁️ Whole playlist playback → `nm playlist play`** (push full playlist to desktop client).
+- Album songs into playlist → `nm playlist import-album` (handles ordering automatically).
 - Playlist data → `nm playlist summary` for in-depth analysis.
 - Auth → `nm auth login` first, then all data commands work.
-- Playback handoff → `nm music play` or `nm queue play`.
+- Single song handoff → `nm music play` or `nm queue play`.
 - Desktop session control → `nm smtc *`.
 - Local file paths → pass directly to `nm` commands.

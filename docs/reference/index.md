@@ -24,7 +24,7 @@
 | `nm playlist summary` | Playlist analysis | [playlist.md](playlist.md) |
 | `nm playlist create` | Create playlist | [playlist.md](playlist.md) |
 | `nm playlist add` | Add songs to a playlist | [playlist.md](playlist.md) |
-| `nm playlist import-album` | Import album songs into a playlist | [playlist.md](playlist.md) |
+| `nm playlist import-album` | Import album songs into a playlist (auto-order) | [playlist.md](playlist.md) |
 | `nm playlist remove` | Remove songs from a playlist | [playlist.md](playlist.md) |
 | `nm playlist dedupe` | Find or remove duplicate songs | [playlist.md](playlist.md) |
 | `nm playlist merge` | Merge source playlists | [playlist.md](playlist.md) |

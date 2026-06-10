@@ -7,7 +7,7 @@ Index: [index.md](index.md)
 | Command | Description |
 |---|---|
 | `nm playlist show` | View playlist details |
-| `nm playlist play` | Play a playlist in the NetEase desktop client |
+| `nm playlist play` | Push entire playlist to NetEase desktop client (cloud push) |
 | `nm playlist tracks` | List all songs in playlist |
 | `nm playlist list` | List user's playlists |
 | `nm playlist summary` | Analyze playlist data |
@@ -19,6 +19,10 @@ Index: [index.md](index.md)
 | `nm playlist merge` | Merge source playlists |
 | `nm playlist export` | Export playlist tracks |
 | `nm playlist audit` | Audit playlist quality |
+
+> ⚠️ **NetEase prepends new songs.** `playlist add` inserts at the **top** of the playlist.
+> To get order A→B→C, pass IDs in reverse: `--song-ids C,B,A`.
+> `playlist import-album` handles this automatically.
 
 ## Command details
 
@@ -63,7 +67,7 @@ nm playlist tracks --id 3778678 --output json
 | Field | Value |
 |---|---|
 | **Name** | `playlist play` |
-| **Description** | Hand a playlist to the NetEase desktop client or browser |
+| **Description** | Push entire playlist to the NetEase desktop client (cloud push) |
 | **Usage** | `nm playlist play --id <playlistId> [--player orpheus|browser] [--no-open]` |
 
 #### Options
