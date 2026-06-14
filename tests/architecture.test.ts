@@ -3,7 +3,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-function commandNamesFromSource(): string[] {
+type CommandMetadata = {
+  name: string;
+  permission?: string;
+};
+
+function commandMetadataFromSource(): CommandMetadata[] {
   const commandDir = join(process.cwd(), 'src', 'commands');
   const main = readFileSync(join(process.cwd(), 'src', 'main.ts'), 'utf-8');
   const files = [
@@ -24,15 +29,16 @@ function commandNamesFromSource(): string[] {
     'nowplaying.ts',
     'doctor.ts',
   ];
-  const commandByExport = new Map<string, string>();
+  const commandByExport = new Map<string, CommandMetadata>();
 
   for (const file of files) {
     const source = readFileSync(join(commandDir, file), 'utf-8');
-    for (const match of source.matchAll(/export const (\w+):?[^=]*=\s*\{[\s\S]*?name:\s*'([^']+)'/g)) {
-      commandByExport.set(match[1], match[2]);
+    for (const match of source.matchAll(/export const (\w+):?[^=]*=\s*\{[\s\S]*?name:\s*'([^']+)'([\s\S]*?)\n\};/g)) {
+      const permission = match[3].match(/permission:\s*'([^']+)'/)?.[1];
+      commandByExport.set(match[1], { name: match[2], permission });
     }
     for (const match of source.matchAll(/export const (\w+)\s*=\s*controlCommand\('([^']+)'/g)) {
-      commandByExport.set(match[1], `smtc ${match[2]}`);
+      commandByExport.set(match[1], { name: `smtc ${match[2]}`, permission: 'public' });
     }
   }
 
@@ -42,6 +48,26 @@ function commandNamesFromSource(): string[] {
       if (!command) throw new Error(`Could not resolve registered command export: ${match[1]}`);
       return command;
     });
+}
+
+function commandNamesFromSource(): string[] {
+  return commandMetadataFromSource().map(command => command.name);
+}
+
+function commandFromInlineNmReference(reference: string, registeredCommands: Set<string>): string | null {
+  if (/^<[^>]+>/.test(reference) || reference.includes('/') || reference.includes('*')) return null;
+
+  const tokens = reference
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter(token => !token.startsWith('--') && !token.startsWith('<') && !token.startsWith('['));
+
+  while (tokens.length > 0) {
+    const candidate = tokens.join(' ');
+    if (registeredCommands.has(candidate)) return candidate;
+    tokens.pop();
+  }
+  return null;
 }
 
 describe('domain normalizers', () => {
@@ -270,5 +296,104 @@ describe('reference docs', () => {
     expect(configCommand).toContain("cmd.name !== 'config export-schema'");
     expect(configReference).toContain('excludes `config export-schema` itself');
     expect(commands.filter(command => command !== 'config export-schema')).toHaveLength(commands.length - 1);
+  });
+
+  it('keeps SKILL command routing aligned with registered commands and clean of drift markers', () => {
+    const commands = new Set(commandNamesFromSource());
+    const skill = readFileSync(join(process.cwd(), 'SKILL.md'), 'utf-8');
+    const inlineNmReferences = [...skill.matchAll(/`nm ([^`]+)`/g)].map(match => match[1]);
+    const unresolved = inlineNmReferences
+      .map(reference => ({ reference, command: commandFromInlineNmReference(reference, commands) }))
+      .filter(({ reference, command }) => {
+        if (command) return false;
+        return ![
+          '<resource> <command> [flags]',
+          '<command> --help',
+          'auth *',
+          'config *',
+          'search *',
+          'toplist *',
+          'pipeline *',
+          'queue *',
+          'smtc *',
+          'memory show/export/clear',
+          'queue add/list/play/next',
+          'playlist list/create/add/import-album/remove/dedupe/merge',
+          'playlist show/play/tracks/summary/export/audit',
+        ].includes(reference);
+      })
+      .map(({ reference }) => reference);
+
+    const capabilityRows = skill
+      .split('\n')
+      .filter(line => line.startsWith('|') && line.includes('`nm '));
+    const rowCommands = capabilityRows
+      .map(line => line.match(/`nm ([^`]+)`/)?.[1])
+      .filter(Boolean);
+    const duplicatedRows = rowCommands.filter((command, index) => rowCommands.indexOf(command) !== index);
+
+    expect(unresolved).toEqual([]);
+    expect(duplicatedRows).toEqual([]);
+    expect(skill).not.toMatch(/73 (?:registered commands|commands|个命令)/i);
+    expect(skill).not.toMatch(/鈥|馃|鉁|鈿|狅|笍|涓|鎵|绔|→/);
+    expect(skill).toContain('high-frequency routing guide, not the complete command index');
+    expect(skill).toContain('`nm playlist play`');
+    expect(skill).toContain('`nm playlist import-album`');
+    expect(skill).toContain('`nm queue *`');
+    expect(skill).toContain('`nm smtc *`');
+    expect(skill).toContain('`nm config export-schema`');
+  });
+
+  it('keeps auth boundary summaries aligned with command permission metadata', () => {
+    const metadata = commandMetadataFromSource();
+    const publicCommands = metadata.filter(command => command.permission === 'public').map(command => command.name);
+    const writeCommands = metadata.filter(command => command.permission === 'write').map(command => command.name);
+    const authCommands = metadata.filter(command => command.permission === 'auth').map(command => command.name);
+    const sensitiveCommands = metadata.filter(command => command.permission === 'sensitive').map(command => command.name);
+
+    expect(publicCommands).toEqual(expect.arrayContaining([
+      'music play',
+      'music download',
+      'playlist play',
+      'playlist export',
+      'playlist audit',
+      'album dynamic',
+      'album summary',
+      'queue play',
+      'smtc status',
+    ]));
+    expect(writeCommands).toEqual(expect.arrayContaining([
+      'music like',
+      'music unlike',
+      'playlist create',
+      'playlist add',
+      'playlist import-album',
+      'playlist remove',
+      'album sub',
+      'album unsub',
+    ]));
+    expect(authCommands).toEqual(expect.arrayContaining([
+      'user profile',
+      'recommend songs',
+      'playlist list',
+      'library liked',
+      'insight weekly',
+    ]));
+    expect(sensitiveCommands).toEqual(['memory clear']);
+
+    const docs = [
+      readFileSync(join(process.cwd(), 'SKILL.md'), 'utf-8'),
+      readFileSync(join(process.cwd(), 'docs', 'reference', 'auth.md'), 'utf-8'),
+      readFileSync(join(process.cwd(), 'docs', 'reference', 'index.md'), 'utf-8'),
+    ];
+
+    for (const doc of docs) {
+      expect(doc).toContain('music info/url/lyric/download/play');
+      expect(doc).toContain('playlist show/play/tracks/summary/export/audit');
+      expect(doc).toContain('album show/dynamic/summary');
+      expect(doc).toContain('memory show/export');
+      expect(doc).toContain('memory clear');
+      expect(doc).toContain('playlist list/create/add/import-album/remove/dedupe/merge');
+    }
   });
 });

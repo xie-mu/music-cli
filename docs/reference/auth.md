@@ -16,7 +16,8 @@ authenticated by the session cookie (`MUSIC_U`).
 | Auth requirement | Command groups |
 |---|---|
 | **Required** | `user *`, `recommend *`, `music like/unlike`, `playlist list/create/add/import-album/remove/dedupe/merge`, `album list/sub/unsub`, `library liked`, `insight *` |
-| **Not required** | `search`, `music info/lyric/url`, `playlist show/play/tracks/summary`, `album show`, `toplist`, `queue *`, `memory *`, `smtc *`, `nowplaying`, `pipeline`, `doctor` |
+| **No NetEase login required** | `auth *`, `config *`, `search *`, `music info/url/lyric/download/play`, `playlist show/play/tracks/summary/export/audit`, `album show/dynamic/summary`, `toplist *`, `pipeline *`, `memory show/export`, `queue *`, `smtc *`, `nowplaying`, `doctor` |
+| **Local sensitive without NetEase login** | `memory clear` deletes local CLI memory state and should be used only when requested |
 
 ### Auth methods
 

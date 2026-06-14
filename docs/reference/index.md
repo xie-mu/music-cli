@@ -122,7 +122,8 @@ Available on every command (in addition to command-specific options):
 ## Notes
 
 - **Auth required**: User-specific and account-write commands (`user *`, `recommend *`, `music like/unlike`, `playlist list/create/add/import-album/remove/dedupe/merge`, `album list/sub/unsub`, `library liked`, `insight *`) require `nm auth login` or a valid cookie.
-- **Public data**: `search`, `music info`, `music lyric`, `music url`, `playlist show/play/tracks/summary`, `album show`, `toplist`, `queue *`, `memory *`, `smtc *`, `nowplaying`, `pipeline`, and `doctor` work without authentication.
+- **No NetEase login required**: `auth *`, `config *`, `search *`, `music info/url/lyric/download/play`, `playlist show/play/tracks/summary/export/audit`, `album show/dynamic/summary`, `toplist *`, `pipeline *`, `memory show/export`, `queue *`, `smtc *`, `nowplaying`, and `doctor` work without NetEase login.
+- **Local sensitive without NetEase login**: `memory clear` deletes local CLI memory state and should be used only when requested.
 - **Playback handoff**: `nm music play` uses the official Orpheus desktop protocol on Windows when possible, falls back to the browser player, and returns only launch intent. Use SMTC commands for local desktop-session status/control when available.
 - **Desktop playlist handoff**: `nm playlist play --id X` hands a remote playlist to the NetEase desktop client. `nm queue *` remains a CLI-local queue stored under local state and does not rewrite the desktop client's right-side play queue.
 - **Album imports**: `nm playlist import-album` submits album songs from last to first so NetEase playlist prepending keeps the final playback order correct.
