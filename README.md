@@ -42,7 +42,9 @@ nm auth login --qrcode   # 扫码登录
 | 🩺 **诊断检查** | `nm doctor` |
 | 🤖 **Agent 协议** | `nm config export-schema` |
 
-**完整命令列表：** 75 个命令，17 个分组 → [docs/reference/index.md](docs/reference/index.md)
+**完整命令列表：** 75 个命令，17 个分组，74 个 Agent 工具 Schema
+→ [docs/reference/index.md](docs/reference/index.md)
+→ `nm config export-schema`
 
 ---
 
@@ -50,7 +52,7 @@ nm auth login --qrcode   # 扫码登录
 
 | 文档 | 说明 |
 |------|------|
-| **[SKILL.md](SKILL.md)** | 📘 AI Agent 指令手册 — 最高优先级路由表 + 鉴权 + 工作流模式 |
+| **[SKILL.md](SKILL.md)** | 📘 AI Agent 指令手册 — 路由表 + YAML 声明 + 鉴权 + 工作流 + 边界 + 排查 |
 | **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | 🏗️ 系统架构 — 加密层/路由/SMTC/Pipeline |
 | **[docs/reference/index.md](docs/reference/index.md)** | 📖 命令参考总索引 — 全命令速查 + 分组 + 全局 Flags |
 | **[docs/reference/*.md](docs/reference/)** | 📑 逐组命令详情 — Options 表 + 示例 |
@@ -61,9 +63,9 @@ nm auth login --qrcode   # 扫码登录
 
 ```
 ┌─ Layer 1: Agent 指令路由 ─────┐
-│  SKILL.md (14 节)              │  ← AI Agent 操作手册
+│  SKILL.md (12 章节)            │  ← AI Agent 操作手册（路由表 + 工作流 + 边界）
 ├─ Layer 2: 命令参考文档 ────────┤
-│  docs/reference/* (16 文件)     │  ← 标准模板，人和 Agent 共用
+│  docs/reference/* (17 文件)     │  ← 统一模板（命令表 + 详情 + Options + 示例）
 ├─ Layer 3: CLI 实现层 ──────────┤
 │  src/ (75 命令, 17 分组)        │  ← TypeScript 源码
 └─ Layer 4: 支撑文档 ────────────┤
@@ -85,7 +87,9 @@ nm auth logout                       # 退出登录
 
 凭证保存在 `~/.netease-music/cookie.json`。
 
-**无需登录的命令：** `search`, `music info/lyric/url`, `playlist show/play/tracks/summary`, `album show`, `toplist`, `queue *`, `memory *`, `smtc *`, `nowplaying`, `pipeline`, `doctor`
+**无需网易云登录的命令：** `auth *`, `config *`, `search *`, `music info/url/lyric/download/play`, `playlist show/play/tracks/summary/export/audit`, `album show/dynamic/summary`, `toplist *`, `pipeline *`, `memory show/export`, `queue *`, `smtc *`, `nowplaying`, `doctor`
+
+**本地敏感操作：** `memory clear` 会删除本地 CLI memory state，不需要网易云登录，但只应在明确要求清理时使用。
 
 ---
 
@@ -165,7 +169,7 @@ netease-music-cli/
 │   └── reference/            # 命令参考文档 (16 文件)
 ├── tools/
 │   └── smtc_query.cs         # Windows SMTC helper
-└── tests/                    # 39 个测试用例
+└── tests/                    # 41 个测试用例（4 套）
 ```
 
 ---
