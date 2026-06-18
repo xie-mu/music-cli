@@ -1,6 +1,7 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 
 type CommandMetadata = {
@@ -273,7 +274,8 @@ describe('reference docs', () => {
     const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf-8');
     const rootReadme = read('README.md');
     const architecture = read(join('docs', 'ARCHITECTURE.md'));
-    const skill = read('SKILL.md');
+    const rootSkill = read('SKILL.md');
+    const detailedSkill = read(join('agent', 'skill', 'SKILL.md'));
     const authReference = read(join('docs', 'reference', 'auth.md'));
     const indexReference = read(join('docs', 'reference', 'index.md'));
     const configReference = read(join('docs', 'reference', 'config.md'));
@@ -284,7 +286,12 @@ describe('reference docs', () => {
     expect(architecture).toContain('Total: 75 registered commands across 17 top-level groups');
     expect(commands).toHaveLength(75);
 
-    for (const doc of [skill, authReference, indexReference]) {
+    expect(rootSkill).toContain('name: muge-music');
+    expect(rootSkill).toContain('agent/skill/SKILL.md');
+    expect(rootSkill).toContain('agent/tools/tool-manifest.json');
+    expect(detailedSkill).toContain('display_name: muge music');
+
+    for (const doc of [detailedSkill, authReference, indexReference]) {
       expect(doc).toContain('import-album');
     }
     for (const doc of [authReference, indexReference]) {
@@ -298,9 +305,10 @@ describe('reference docs', () => {
     expect(commands.filter(command => command !== 'config export-schema')).toHaveLength(commands.length - 1);
   });
 
-  it('keeps SKILL command routing aligned with registered commands and clean of drift markers', () => {
+  it('keeps the detailed muge music skill command routing aligned with registered commands and clean of drift markers', () => {
     const commands = new Set(commandNamesFromSource());
-    const skill = readFileSync(join(process.cwd(), 'SKILL.md'), 'utf-8');
+    const rootSkill = readFileSync(join(process.cwd(), 'SKILL.md'), 'utf-8');
+    const skill = readFileSync(join(process.cwd(), 'agent', 'skill', 'SKILL.md'), 'utf-8');
     const inlineNmReferences = [...skill.matchAll(/`nm ([^`]+)`/g)].map(match => match[1]);
     const unresolved = inlineNmReferences
       .map(reference => ({ reference, command: commandFromInlineNmReference(reference, commands) }))
@@ -334,9 +342,11 @@ describe('reference docs', () => {
 
     expect(unresolved).toEqual([]);
     expect(duplicatedRows).toEqual([]);
+    expect(rootSkill).not.toMatch(/73 (?:registered commands|commands|个命令)/i);
+    expect(rootSkill).not.toMatch(/鈥|馃|鉁|鈿|狅|笍|涓|鎵|绔|→/);
     expect(skill).not.toMatch(/73 (?:registered commands|commands|个命令)/i);
     expect(skill).not.toMatch(/鈥|馃|鉁|鈿|狅|笍|涓|鎵|绔|→/);
-    expect(skill).toContain('high-frequency routing guide, not the complete command index');
+    expect(skill).toContain('full `muge music` routing guide');
     expect(skill).toContain('`nm playlist play`');
     expect(skill).toContain('`nm playlist import-album`');
     expect(skill).toContain('`nm queue *`');
@@ -382,7 +392,7 @@ describe('reference docs', () => {
     expect(sensitiveCommands).toEqual(['memory clear']);
 
     const docs = [
-      readFileSync(join(process.cwd(), 'SKILL.md'), 'utf-8'),
+      readFileSync(join(process.cwd(), 'agent', 'skill', 'SKILL.md'), 'utf-8'),
       readFileSync(join(process.cwd(), 'docs', 'reference', 'auth.md'), 'utf-8'),
       readFileSync(join(process.cwd(), 'docs', 'reference', 'index.md'), 'utf-8'),
     ];
@@ -395,5 +405,58 @@ describe('reference docs', () => {
       expect(doc).toContain('memory clear');
       expect(doc).toContain('playlist list/create/add/import-album/remove/dedupe/merge');
     }
+  });
+
+  it('keeps the muge music tool layer manifest, schema snapshot, and runner usable', () => {
+    const schema = JSON.parse(readFileSync(join(process.cwd(), 'agent', 'tools', 'schema.generated.json'), 'utf-8'));
+    const manifest = JSON.parse(readFileSync(join(process.cwd(), 'agent', 'tools', 'tool-manifest.json'), 'utf-8'));
+    const metadata = JSON.parse(readFileSync(join(process.cwd(), 'agent', 'skill', 'metadata.json'), 'utf-8'));
+
+    expect(metadata).toMatchObject({
+      name: 'muge-music',
+      display_name: 'muge music',
+      version: '1.3.0',
+    });
+    expect(manifest).toMatchObject({
+      version: '1.3.0',
+      schema_count: 74,
+      command_count: 75,
+      runner: 'agent/tools/nm-tool-runner.mjs',
+    });
+    expect(schema).toHaveLength(74);
+    expect(schema.map((tool: any) => tool.name)).toEqual(expect.arrayContaining([
+      'netease_config_show',
+      'netease_music_info',
+      'netease_playlist_import-album',
+      'netease_smtc_status',
+    ]));
+
+    const readRunner = spawnSync(
+      process.execPath,
+      ['agent/tools/nm-tool-runner.mjs', 'netease_config_show', '{}', '{"preferLocal":true}'],
+      { cwd: process.cwd(), encoding: 'utf8' },
+    );
+    expect(readRunner.status).toBe(0);
+    const readResult = JSON.parse(readRunner.stdout);
+    expect(readResult).toMatchObject({
+      ok: true,
+      tool: 'netease_config_show',
+      command: 'config show',
+      cliSource: 'local-dist',
+    });
+    expect(readResult.parsed).toHaveProperty('output');
+
+    const blockedWrite = spawnSync(
+      process.execPath,
+      ['agent/tools/nm-tool-runner.mjs', 'netease_playlist_create', '{"name":"x"}'],
+      { cwd: process.cwd(), encoding: 'utf8' },
+    );
+    expect(blockedWrite.status).toBe(3);
+    const blockedResult = JSON.parse(blockedWrite.stdout);
+    expect(blockedResult).toMatchObject({
+      ok: false,
+      tool: 'netease_playlist_create',
+      permission: 'write',
+    });
   });
 });

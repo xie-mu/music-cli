@@ -1,0 +1,21 @@
+{
+  "name": "muge-music",
+  "display_name": "muge music",
+  "version": "1.3.0",
+  "description": "Chinese-first NetEase Cloud Music Agent skill with a separate nm CLI tool execution layer.",
+  "cli": {
+    "package": "netease-music-cli",
+    "binary": "nm",
+    "version": "1.3.0",
+    "fallback_entry": "dist/main.mjs",
+    "node": ">=22.12.0"
+  },
+  "paths": {
+    "root_entrypoint": "SKILL.md",
+    "full_skill": "agent/skill/SKILL.md",
+    "tool_manifest": "agent/tools/tool-manifest.json",
+    "tool_schema": "agent/tools/schema.generated.json",
+    "tool_runner": "agent/tools/nm-tool-runner.mjs",
+    "command_reference": "docs/reference/index.md"
+  }
+}

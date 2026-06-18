@@ -135,7 +135,15 @@ The CLI includes a DAG-based workflow engine for multi-step orchestration:
 
 ```
 netease-music-cli/
-├── SKILL.md                       # Agent skill metadata
+├── SKILL.md                       # muge music lightweight skill entrypoint
+├── agent/
+│   ├── skill/
+│   │   ├── SKILL.md               # Full muge music routing/safety/workflow guide
+│   │   └── metadata.json          # Skill, CLI, and tool layer version metadata
+│   └── tools/
+│       ├── schema.generated.json  # Runtime schema snapshot from config export-schema
+│       ├── tool-manifest.json     # Tool runner and fallback metadata
+│       └── nm-tool-runner.mjs     # Generic schema-driven CLI runner
 ├── src/
 │   ├── main.ts                    # Entry point + help system
 │   ├── router.ts                  # Trie tree command routing

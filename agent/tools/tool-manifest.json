@@ -1,0 +1,26 @@
+{
+  "name": "muge-music-tools",
+  "display_name": "muge music tool layer",
+  "version": "1.3.0",
+  "schema_version": "function-calling/v1",
+  "runner": "agent/tools/nm-tool-runner.mjs",
+  "schema": "agent/tools/schema.generated.json",
+  "cli": {
+    "binary": "nm",
+    "fallback_entry": "dist/main.mjs",
+    "prefer_global": true,
+    "json_output_default": true
+  },
+  "schema_count": 74,
+  "command_count": 75,
+  "full_schema_excludes": [
+    "config export-schema"
+  ],
+  "write_guard": {
+    "permissions": [
+      "write",
+      "sensitive"
+    ],
+    "requires_option": "allowWrite"
+  }
+}

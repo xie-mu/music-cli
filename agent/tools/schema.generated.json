@@ -1,0 +1,1303 @@
+[
+  {
+    "name": "netease_auth_login",
+    "description": "登录网易云音乐（手机号/二维码）",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": "手机号"
+        },
+        "password": {
+          "type": "string",
+          "description": "密码（明文）"
+        },
+        "qrcode": {
+          "type": "string",
+          "description": "二维码登录"
+        },
+        "countryCode": {
+          "type": "string",
+          "description": "国家码（默认86）"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_auth_status",
+    "description": "检查登录状态",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_auth_logout",
+    "description": "退出登录",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_config_show",
+    "description": "显示当前配置",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_config_set",
+    "description": "设置配置项",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "配置键 (output/timeout/cookieFile/countryCode/player/downloadDir/stateDir)"
+        },
+        "value": {
+          "type": "string",
+          "description": "配置值"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ]
+    }
+  },
+  {
+    "name": "netease_user_profile",
+    "description": "Get user profile",
+    "permission": "auth",
+    "capability": "user.profile",
+    "returns": "UserProfile",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "number",
+          "description": "User ID; defaults to current user"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_user_account",
+    "description": "Get current account info",
+    "permission": "auth",
+    "capability": "user.account",
+    "returns": "Account",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_user_history",
+    "description": "Get listening records",
+    "permission": "auth",
+    "capability": "user.history",
+    "returns": "PlayRecord[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "number",
+          "description": "User ID; defaults to current user"
+        },
+        "type": {
+          "type": "string",
+          "description": "all or week"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_user_level",
+    "description": "Get user level",
+    "permission": "auth",
+    "capability": "user.level",
+    "returns": "UserLevel",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_user_subcount",
+    "description": "Get subscription counts",
+    "permission": "auth",
+    "capability": "user.subcount",
+    "returns": "UserSubcount",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_music_info",
+    "description": "Get song details",
+    "permission": "public",
+    "capability": "music.info",
+    "returns": "Song[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Song ID"
+        },
+        "ids": {
+          "type": "string",
+          "description": "Comma-separated song IDs"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_music_url",
+    "description": "Get song playback URL",
+    "permission": "public",
+    "capability": "music.url",
+    "returns": "PlaybackUrl[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Song ID"
+        },
+        "br": {
+          "type": "string",
+          "description": "Bitrate: 128000/192000/320000/999000"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_music_lyric",
+    "description": "Get LRC lyrics, optionally synced",
+    "permission": "public",
+    "capability": "music.lyric",
+    "returns": "Lyric",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Song ID"
+        },
+        "sync": {
+          "type": "string",
+          "description": "Synchronized display mode"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_music_download",
+    "description": "Download song to a local file",
+    "permission": "public",
+    "capability": "music.download",
+    "returns": "DownloadResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Song ID"
+        },
+        "out": {
+          "type": "string",
+          "description": "Output file path"
+        },
+        "br": {
+          "type": "string",
+          "description": "Bitrate"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_music_play",
+    "description": "Open the official NetEase web player",
+    "permission": "public",
+    "capability": "music.play",
+    "returns": "PlayerResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Song ID"
+        },
+        "br": {
+          "type": "string",
+          "description": "Bitrate"
+        },
+        "player": {
+          "type": "string",
+          "description": "Player: orpheus (background) | browser (default: auto)"
+        },
+        "noOpen": {
+          "type": "boolean",
+          "description": "Do not open browser; only return the official song URL"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_music_like",
+    "description": "Like a song",
+    "permission": "write",
+    "capability": "music.like",
+    "returns": "LikeResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Song ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_music_unlike",
+    "description": "Unlike a song",
+    "permission": "write",
+    "capability": "music.unlike",
+    "returns": "LikeResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Song ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_show",
+    "description": "View playlist details",
+    "permission": "public",
+    "capability": "playlist.show",
+    "returns": "Playlist",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Playlist ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_play",
+    "description": "Play a playlist in the NetEase desktop client",
+    "permission": "public",
+    "capability": "playlist.play",
+    "returns": "PlayerResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Playlist ID"
+        },
+        "player": {
+          "type": "string",
+          "description": "Playback target: orpheus or browser"
+        },
+        "noOpen": {
+          "type": "boolean",
+          "description": "Do not open player; only return the playlist URL"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_tracks",
+    "description": "List playlist songs",
+    "permission": "public",
+    "capability": "playlist.tracks",
+    "returns": "Song[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Playlist ID"
+        },
+        "page": {
+          "type": "number",
+          "description": "Page number (default: 1)"
+        },
+        "pageSize": {
+          "type": "number",
+          "description": "Results per page (default: 50)"
+        },
+        "all": {
+          "type": "string",
+          "description": "Show ALL tracks (overrides --page)"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_list",
+    "description": "List user playlists",
+    "permission": "auth",
+    "capability": "playlist.list",
+    "returns": "Playlist[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "number",
+          "description": "User ID; defaults to current user"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_playlist_summary",
+    "description": "Analyze playlist data",
+    "permission": "public",
+    "capability": "playlist.summary",
+    "returns": "PlaylistSummary",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Playlist ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_create",
+    "description": "Create a playlist",
+    "permission": "write",
+    "capability": "playlist.create",
+    "returns": "PlaylistCreateResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Playlist name"
+        },
+        "desc": {
+          "type": "string",
+          "description": "Playlist description"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_add",
+    "description": "Add songs to a playlist",
+    "permission": "write",
+    "capability": "playlist.add",
+    "returns": "PlaylistMutationResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Playlist ID"
+        },
+        "songIds": {
+          "type": "string",
+          "description": "Comma-separated song IDs"
+        }
+      },
+      "required": [
+        "id",
+        "songIds"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_import-album",
+    "description": "Import album songs into a playlist in playback order",
+    "permission": "write",
+    "capability": "playlist.importAlbum",
+    "returns": "PlaylistAlbumImportResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Target playlist ID"
+        },
+        "albumId": {
+          "type": "number",
+          "description": "Source album ID"
+        }
+      },
+      "required": [
+        "id",
+        "albumId"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_remove",
+    "description": "Remove songs from a playlist",
+    "permission": "write",
+    "capability": "playlist.remove",
+    "returns": "PlaylistMutationResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Playlist ID"
+        },
+        "songIds": {
+          "type": "string",
+          "description": "Comma-separated song IDs"
+        }
+      },
+      "required": [
+        "id",
+        "songIds"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_dedupe",
+    "description": "Find or remove duplicate songs in a playlist",
+    "permission": "write",
+    "capability": "playlist.dedupe",
+    "returns": "PlaylistDedupeResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Playlist ID"
+        },
+        "apply": {
+          "type": "string",
+          "description": "Remove duplicates remotely"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_merge",
+    "description": "Merge source playlists into a target playlist",
+    "permission": "write",
+    "capability": "playlist.merge",
+    "returns": "PlaylistMergeResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "sourceIds": {
+          "type": "string",
+          "description": "Comma-separated source playlist IDs"
+        },
+        "targetId": {
+          "type": "number",
+          "description": "Target playlist ID"
+        },
+        "apply": {
+          "type": "string",
+          "description": "Add merged songs to target playlist"
+        }
+      },
+      "required": [
+        "sourceIds"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_export",
+    "description": "Export playlist tracks as JSON/Markdown/text",
+    "permission": "public",
+    "capability": "playlist.export",
+    "returns": "Song[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Playlist ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_playlist_audit",
+    "description": "Audit playlist quality and duplicates",
+    "permission": "public",
+    "capability": "playlist.audit",
+    "returns": "PlaylistAudit",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Playlist ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_album_show",
+    "description": "View album details and tracks",
+    "permission": "public",
+    "capability": "album.show",
+    "returns": "Album",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Album ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_album_list",
+    "description": "List subscribed albums",
+    "permission": "auth",
+    "capability": "album.list",
+    "returns": "Album[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_album_sub",
+    "description": "Subscribe to an album",
+    "permission": "write",
+    "capability": "album.sub",
+    "returns": "AlbumSubscriptionResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Album ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_album_unsub",
+    "description": "Unsubscribe from an album",
+    "permission": "write",
+    "capability": "album.unsub",
+    "returns": "AlbumSubscriptionResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Album ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_album_dynamic",
+    "description": "View album dynamic stats",
+    "permission": "public",
+    "capability": "album.dynamic",
+    "returns": "AlbumDynamic",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Album ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_album_summary",
+    "description": "Summarize album data",
+    "permission": "public",
+    "capability": "album.summary",
+    "returns": "AlbumSummary",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Album ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_search",
+    "description": "Search NetEase Cloud Music",
+    "permission": "public",
+    "capability": "search",
+    "returns": "Song[]|Artist[]|Album[]|Playlist[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "Search keyword"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type: song, playlist, album, artist"
+        },
+        "limit": {
+          "type": "number",
+          "description": "Results per page"
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    }
+  },
+  {
+    "name": "netease_search_hot",
+    "description": "Get hot search terms",
+    "permission": "public",
+    "capability": "search.hot",
+    "returns": "HotSearchTerm[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_search_suggest",
+    "description": "Get search suggestions",
+    "permission": "public",
+    "capability": "search.suggest",
+    "returns": "SearchSuggestion[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "Search keyword"
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    }
+  },
+  {
+    "name": "netease_toplist",
+    "description": "List all NetEase charts",
+    "permission": "public",
+    "capability": "toplist.list",
+    "returns": "Playlist[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_toplist_detail",
+    "description": "Get chart tracks",
+    "permission": "public",
+    "capability": "toplist.detail",
+    "returns": "Song[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Toplist playlist ID"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_recommend_songs",
+    "description": "Get daily recommended songs",
+    "permission": "auth",
+    "capability": "recommend.songs",
+    "returns": "Song[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_recommend_playlists",
+    "description": "Get recommended playlists",
+    "permission": "auth",
+    "capability": "recommend.playlists",
+    "returns": "Playlist[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_pipeline_validate",
+    "description": "验证 Pipeline 定义文件",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "Pipeline 定义文件路径"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_pipeline_run",
+    "description": "执行 Pipeline 工作流",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "description": "Pipeline 定义文件路径"
+        },
+        "input": {
+          "type": "string",
+          "description": "输入参数 JSON"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_memory_show",
+    "description": "Show local music memory summary",
+    "permission": "public",
+    "capability": "memory.show",
+    "returns": "MemorySummary",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "number",
+          "description": "Recent event limit"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_memory_export",
+    "description": "Export local music memory events",
+    "permission": "public",
+    "capability": "memory.export",
+    "returns": "LocalEvent[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Filter event type"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_memory_clear",
+    "description": "Clear local music memory",
+    "permission": "sensitive",
+    "capability": "memory.clear",
+    "returns": "MemoryClearResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "description": "Clear one cache namespace instead of all memory"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_library_liked",
+    "description": "List liked songs for the current or specified user",
+    "permission": "auth",
+    "capability": "library.liked",
+    "returns": "Song[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "number",
+          "description": "User ID; defaults to current user"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_queue_add",
+    "description": "Add a song to the local playback queue",
+    "permission": "public",
+    "capability": "queue.add",
+    "returns": "QueueItem",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Song ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Song name hint"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  {
+    "name": "netease_queue_list",
+    "description": "List the local playback queue",
+    "permission": "public",
+    "capability": "queue.list",
+    "returns": "QueueItem[]",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_queue_remove",
+    "description": "Remove an item from the local queue by 1-based index",
+    "permission": "public",
+    "capability": "queue.remove",
+    "returns": "QueueItem|null",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "number",
+          "description": "1-based queue index"
+        }
+      },
+      "required": [
+        "index"
+      ]
+    }
+  },
+  {
+    "name": "netease_queue_clear",
+    "description": "Clear the local playback queue",
+    "permission": "public",
+    "capability": "queue.clear",
+    "returns": "QueueClearResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_queue_next",
+    "description": "Advance to the next local queue item",
+    "permission": "public",
+    "capability": "queue.next",
+    "returns": "QueueItem|null",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_queue_play",
+    "description": "Open the current or next queue item in the official web player",
+    "permission": "public",
+    "capability": "queue.play",
+    "returns": "PlayerResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "noOpen": {
+          "type": "boolean",
+          "description": "Do not open browser; only return the official song URL"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_insight_weekly",
+    "description": "Generate weekly listening insight",
+    "permission": "auth",
+    "capability": "insight.weekly",
+    "returns": "ListeningInsight",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "number",
+          "description": "User ID; defaults to current user"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_insight_monthly",
+    "description": "Generate monthly-style listening insight from available history",
+    "permission": "auth",
+    "capability": "insight.monthly",
+    "returns": "ListeningInsight",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "number",
+          "description": "User ID; defaults to current user"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_insight_yearly",
+    "description": "Generate yearly-style listening insight from available history",
+    "permission": "auth",
+    "capability": "insight.yearly",
+    "returns": "ListeningInsight",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "number",
+          "description": "User ID; defaults to current user"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_status",
+    "description": "Read the current NetEase SMTC media session",
+    "permission": "public",
+    "capability": "smtc.status",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "watch": {
+          "type": "boolean",
+          "description": "Poll SMTC status until interrupted"
+        },
+        "all": {
+          "type": "boolean",
+          "description": "Include all system media sessions"
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_sessions",
+    "description": "List active Windows SMTC media sessions",
+    "permission": "public",
+    "capability": "smtc.sessions",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_play",
+    "description": "Request SMTC play on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.play",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_pause",
+    "description": "Request SMTC pause on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.pause",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_toggle",
+    "description": "Request SMTC toggle on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.toggle",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_next",
+    "description": "Request SMTC next on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.next",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_prev",
+    "description": "Request SMTC prev on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.prev",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_stop",
+    "description": "Request SMTC stop on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.stop",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_seek",
+    "description": "Request SMTC seek on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.seek",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "number",
+          "description": "Playback position in seconds"
+        }
+      },
+      "required": [
+        "position"
+      ]
+    }
+  },
+  {
+    "name": "netease_smtc_rate",
+    "description": "Request SMTC rate on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.rate",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "Playback rate, for example 1 or 1.25"
+        }
+      },
+      "required": [
+        "value"
+      ]
+    }
+  },
+  {
+    "name": "netease_smtc_shuffle",
+    "description": "Request SMTC shuffle on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.shuffle",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "string",
+          "description": "Enable or disable shuffle"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    }
+  },
+  {
+    "name": "netease_smtc_repeat",
+    "description": "Request SMTC repeat on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.repeat",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "description": "Repeat mode: none, one, or all"
+        }
+      },
+      "required": [
+        "mode"
+      ]
+    }
+  },
+  {
+    "name": "netease_smtc_fast-forward",
+    "description": "Request SMTC fast-forward on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.fast-forward",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_smtc_rewind",
+    "description": "Request SMTC rewind on the NetEase media session",
+    "permission": "public",
+    "capability": "smtc.rewind",
+    "returns": "SmtcResult",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_nowplaying",
+    "description": "检测浏览器中正在播放的歌曲",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  },
+  {
+    "name": "netease_doctor",
+    "description": "Check CLI installation, auth, public API, pipeline, and docs health",
+    "permission": "public",
+    "capability": "doctor",
+    "returns": "DoctorReport",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+]

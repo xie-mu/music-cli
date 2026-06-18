@@ -6,7 +6,7 @@
 
 > **NetEase Cloud Music AI Agent CLI** — 基于命令行的网易云音乐控制工具，专为 AI Agent 和终端用户设计。
 
-`nm` 是一个功能完整的网易云音乐 CLI，支持搜索、播放、歌单管理、歌词同步、Windows SMTC 控制、本地队列、听歌报告、工作流编排等能力。同时提供面向 AI Agent 的 SKILL.md 指令手册和 Function Calling Schema，让 Agent 可直接通过命令行操作网易云音乐。
+`nm` 是一个功能完整的网易云音乐 CLI，支持搜索、播放、歌单管理、歌词同步、Windows SMTC 控制、本地队列、听歌报告、工作流编排等能力。同时提供 `muge music` Agent skill 和独立 Tool 执行层，让 Agent 可以先判断意图，再通过 schema-driven runner 调用命令行工具。
 
 ---
 
@@ -14,7 +14,7 @@
 
 ```bash
 npm install -g netease-music-cli
-nm --version        # v1.2.0
+nm --version        # v1.3.0
 nm auth login --qrcode   # 扫码登录
 ```
 
@@ -40,7 +40,7 @@ nm auth login --qrcode   # 扫码登录
 | 🔄 **工作流编排** | `nm pipeline run <file.yaml>` |
 | 🪟 **SMTC 控制** | `nm smtc status/play/pause/next/prev/...` |
 | 🩺 **诊断检查** | `nm doctor` |
-| 🤖 **Agent 协议** | `nm config export-schema` |
+| 🤖 **Agent 协议** | `nm config export-schema` / `agent/tools/nm-tool-runner.mjs` |
 
 **完整命令列表：** 75 个命令，17 个分组，74 个 Agent 工具 Schema
 → [docs/reference/index.md](docs/reference/index.md)
@@ -52,7 +52,9 @@ nm auth login --qrcode   # 扫码登录
 
 | 文档 | 说明 |
 |------|------|
-| **[SKILL.md](SKILL.md)** | 📘 AI Agent 指令手册 — 路由表 + YAML 声明 + 鉴权 + 工作流 + 边界 + 排查 |
+| **[SKILL.md](SKILL.md)** | 📘 `muge music` 快速入口 — 指向详细 skill 和工具层 |
+| **[agent/skill/SKILL.md](agent/skill/SKILL.md)** | 🧭 Skill 判断层 — 路由表 + 鉴权 + 工作流 + 边界 + 排查 |
+| **[agent/tools/tool-manifest.json](agent/tools/tool-manifest.json)** | 🛠️ Tool 执行层 — schema 快照 + runner + CLI fallback |
 | **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** | 🏗️ 系统架构 — 加密层/路由/SMTC/Pipeline |
 | **[docs/reference/index.md](docs/reference/index.md)** | 📖 命令参考总索引 — 全命令速查 + 分组 + 全局 Flags |
 | **[docs/reference/*.md](docs/reference/)** | 📑 逐组命令详情 — Options 表 + 示例 |
@@ -62,14 +64,16 @@ nm auth login --qrcode   # 扫码登录
 ### 架构分层
 
 ```
-┌─ Layer 1: Agent 指令路由 ─────┐
-│  SKILL.md (12 章节)            │  ← AI Agent 操作手册（路由表 + 工作流 + 边界）
-├─ Layer 2: 命令参考文档 ────────┤
-│  docs/reference/* (17 文件)     │  ← 统一模板（命令表 + 详情 + Options + 示例）
-├─ Layer 3: CLI 实现层 ──────────┤
-│  src/ (75 命令, 17 分组)        │  ← TypeScript 源码
-└─ Layer 4: 支撑文档 ────────────┤
-   ARCHITECTURE + PLAYBACK + SMTC  │  ← 设计决策记录
+┌─ Layer 1: muge music Skill 判断层 ─┐
+│  SKILL.md + agent/skill/SKILL.md    │  ← 触发、路由、边界、工作流
+├─ Layer 2: Tool 执行层 ──────────────┤
+│  agent/tools/*                      │  ← schema 快照 + 通用 runner + fallback
+├─ Layer 3: 命令参考文档 ─────────────┤
+│  docs/reference/* (17 文件)          │  ← 命令表 + 详情 + Options + 示例
+├─ Layer 4: CLI 实现层 ───────────────┤
+│  src/ (75 命令, 17 分组)             │  ← TypeScript 源码
+└─ Layer 5: 支撑文档 ─────────────────┤
+   ARCHITECTURE + PLAYBACK + SMTC      │  ← 设计决策记录
 ```
 
 ---
@@ -151,7 +155,15 @@ nm pipeline run scenarios/playlist-report.yaml --input '{"playlistId":"3778678"}
 
 ```
 netease-music-cli/
-├── SKILL.md                  # AI Agent 指令手册
+├── SKILL.md                  # muge music 快速入口
+├── agent/
+│   ├── skill/
+│   │   ├── SKILL.md          # muge music 详细 skill
+│   │   └── metadata.json     # skill 版本和入口元数据
+│   └── tools/
+│       ├── schema.generated.json
+│       ├── tool-manifest.json
+│       └── nm-tool-runner.mjs
 ├── src/
 │   ├── main.ts               # 入口 + 75 个命令注册
 │   ├── router.ts             # Trie 树命令路由
@@ -169,7 +181,7 @@ netease-music-cli/
 │   └── reference/            # 命令参考文档 (16 文件)
 ├── tools/
 │   └── smtc_query.cs         # Windows SMTC helper
-└── tests/                    # 41 个测试用例（4 套）
+└── tests/                    # 42 个测试用例（4 套）
 ```
 
 ---

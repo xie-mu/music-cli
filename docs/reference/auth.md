@@ -2,7 +2,7 @@
 
 Index: [index.md](index.md)
 
-> **Installation:** See [SKILL.md](../../SKILL.md#installation) for `npm install -g` instructions.
+> **Installation:** See [muge music entrypoint](../../SKILL.md) and [agent skill](../../agent/skill/SKILL.md) for setup guidance.
 > Requires Node.js ≥ 22.12.0.
 
 ## Auth overview
