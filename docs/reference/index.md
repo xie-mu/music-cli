@@ -43,8 +43,8 @@
 | `nm user subcount` | Subscription counts | [user.md](user.md) |
 | `nm toplist` | Music charts | [toplist.md](toplist.md) |
 | `nm toplist detail` | Chart details | [toplist.md](toplist.md) |
-| `nm recommend songs` | Daily recommend songs | [toplist.md](toplist.md) |
-| `nm recommend playlists` | Recommend playlists | [toplist.md](toplist.md) |
+| `nm recommend songs` | Daily recommend songs | [toplist.md](toplist.md#recommend) |
+| `nm recommend playlists` | Recommend playlists | [toplist.md](toplist.md#recommend) |
 | `nm auth login` | Login (QR/phone) | [auth.md](auth.md) |
 | `nm auth status` | Check login status | [auth.md](auth.md) |
 | `nm auth logout` | Logout | [auth.md](auth.md) |
@@ -95,7 +95,7 @@
 | `album` | `show`, `list`, `sub`, `unsub`, `dynamic`, `summary` | [album.md](album.md) |
 | `search` | `(root)`, `hot`, `suggest` | [search.md](search.md) |
 | `toplist` | `(root)`, `detail` | [toplist.md](toplist.md) |
-| `recommend` | `songs`, `playlists` | [toplist.md](toplist.md) |
+| `recommend` | `songs`, `playlists` | [toplist.md](toplist.md#recommend) |
 | `pipeline` | `validate`, `run` | [pipeline.md](pipeline.md) |
 | `memory` | `show`, `export`, `clear` | [memory.md](memory.md) |
 | `library` | `liked` | [library.md](library.md) |

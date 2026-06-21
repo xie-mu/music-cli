@@ -6,7 +6,7 @@ description: >-
   layer first. This root skill is a lightweight entrypoint; load
   `agent/skill/SKILL.md` for routing, safety boundaries, and workflows, and use
   `agent/tools/` for schema-driven command execution. Current skill/tool bundle
-  version: 1.3.0.
+  version: 1.3.0
 metadata:
   short-description: NetEase Cloud Music Agent skill and nm tool layer
   version: 1.3.0
